@@ -3,12 +3,12 @@ local my_utility = require("my_utility/my_utility")
 local menu_elements_upheaval_base =
 {
     tree_tab            = tree_node:new(1),
-    main_boolean        = checkbox:new(true, get_hash(my_utility.plugin_label .. "frenzy_base_main_bool")),
+    main_boolean        = checkbox:new(true, get_hash(my_utility.plugin_label .. "upheaval_base_main_bool")),
 }
 
 local function menu()
     
-    if menu_elements_upheaval_base.tree_tab:push("Frenzy")then
+    if menu_elements_upheaval_base.tree_tab:push("Upheaval")then
         menu_elements_upheaval_base.main_boolean:render("Enable Spell", "")
  
          menu_elements_upheaval_base.tree_tab:pop()
