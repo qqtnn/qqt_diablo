@@ -1,33 +1,22 @@
--- all in one (aio) target selector data
--- returns table:
 
--- bool, is_valid -- true once finds 1 valid target inside the list regardless of type
--- game_object, closest unit
--- game_object, lowest current health unit
--- game_object, highest current health unit
--- game_object, lowest max health unit
--- game_object, highest max health unit
 
--- bool, has_elite -- true once finds 1 elite inside the list
--- game_object, closest elite
--- game_object, lowest current health elite
--- game_object, highest current health elite
--- game_object, lowest max health elite
--- game_object, highest max health elite
+-- Add a variable to select the targeting mode
+local targeting_mode = "player" -- default to cursor, can be "cursor" or "player"
 
--- bool, has_champion -- true once finds 1 champion inside the list
--- game_object, closest champion
--- game_object, lowest current health champion
--- game_object, highest current health champion
--- game_object, lowest max health champion
--- game_object, highest max health champion
+-- Function to get the selected position based on the targeting mode
+local function get_selected_position()
+    if targeting_mode == "player" then
+        return get_player_position()
+    else
+        return get_cursor_position()
+    end
+end
 
--- bool, has_boss -- true once finds 1 boss inside the list
--- game_object, closest boss
--- game_object, lowest current health boss
--- game_object, highest current health boss
--- game_object, lowest max health boss
--- game_object, highest max health boss
+local function set_targeting_mode(mode)
+    if mode == "cursor" or mode == "player" then
+        targeting_mode = mode
+    end
+end
 
 local function get_target_selector_data(source, list)
     local is_valid = false;
@@ -39,6 +28,8 @@ local function get_target_selector_data(source, list)
             is_valid = is_valid;
         }
     end;
+
+    local actual_source = source or get_selected_position()
 
     local closest_unit = {};
     local closest_unit_distance = math.huge;
@@ -105,16 +96,24 @@ local function get_target_selector_data(source, list)
 
     for _, unit in ipairs(possible_targets_list) do
         local unit_position = unit:get_position()
-        local distance_sqr = unit_position:squared_dist_to_ignore_z(source)
-
+        local distance_sqr = unit_position:squared_dist_to_ignore_z(actual_source)
+        local selected_position = get_selected_position()
         local max_health = unit:get_max_health()
         local current_health = unit:get_current_health()
 
         -- update units data
-        if distance_sqr < closest_unit_distance then
+        if unit_position:dist_to(selected_position) <= 1 then
             closest_unit = unit;
             closest_unit_distance = distance_sqr;
             is_valid = true;
+        elseif distance_sqr < closest_unit_distance then
+            closest_unit = unit;
+            closest_unit_distance = distance_sqr;
+            is_valid = true;
+
+        elseif unit_position:dist_to(selected_position) < 2 then
+            closest_unit = unit;
+            closest_unit_distance = distance_sqr;
         end
 
         if current_health < lowest_current_health_unit_health then
@@ -228,7 +227,7 @@ local function get_target_selector_data(source, list)
         end
     end
 
-    return 
+    return
     {
         is_valid = is_valid,
 
@@ -261,22 +260,19 @@ local function get_target_selector_data(source, list)
 
         list = possible_targets_list
     }
-
 end
 
--- get target list with few parameters
--- collision parameter table: {is_enabled(bool), width(float)};
--- floor parameter table: {is_enabled(bool), height(float)};
--- angle parameter table: {is_enabled(bool), max_angle(float)};
 local function get_target_list(source, range, collision_table, floor_table, angle_table)
-
     local new_list = {}
-    local possible_targets_list = target_selector.get_near_target_list(source, range);
+    
+    -- Use the current selected position if no source is provided
+    local actual_source = source or get_selected_position()
+    
+    local possible_targets_list = target_selector.get_near_target_list(actual_source, range);
     
     for _, unit in ipairs(possible_targets_list) do
-
         if collision_table.is_enabled then
-            local is_invalid = prediction.is_wall_collision(source, unit:get_position(), collision_table.width);
+            local is_invalid = prediction.is_wall_collision(actual_source, unit:get_position(), collision_table.width);
             if is_invalid then
                 goto continue;
             end
@@ -285,19 +281,19 @@ local function get_target_list(source, range, collision_table, floor_table, angl
         local unit_position = unit:get_position()
 
         if floor_table.is_enabled then
-            local z_difference = math.abs(source.z() - unit_position:z())
-            local is_other_floor = z_difference > floor_table.height
-        
+            local x_difference = math.abs(actual_source.x() - unit_position.x())
+            local is_other_floor = x_difference > floor_table.height
+
             if is_other_floor then
                 goto continue
             end
         end
 
         if angle_table.is_enabled then
-            local cursor_position = get_cursor_position();
-            local angle = unit_position:get_angle(cursor_position, source);
-            local is_outside_angle = angle > floor_table.max_angle
-        
+            local selected_position = get_selected_position()
+            local angle = unit_position:angle(selected_position, actual_source);
+            local is_outside_angle = angle > angle_table.max_angle
+
             if is_outside_angle then
                 goto continue
             end
@@ -329,7 +325,7 @@ local function get_most_hits_rectangle(source, lenght, width)
     end
 
     local main_target = data.main_target;
-    is_valid = hits_amount > 0 and main_target ~= nil;
+    is_valid = hits_amount > 0 and main_target;
     return
     {
         is_valid = is_valid,
@@ -361,7 +357,7 @@ local function get_most_hits_circular(source, distance, radius)
     end
 
     local main_target = data.main_target;
-    is_valid = hits_amount > 0 and main_target ~= nil;
+    is_valid = hits_amount > 0 and main_target;
     return
     {
         is_valid = is_valid,
@@ -441,11 +437,16 @@ local function is_valid_area_spell_aio(area_table, min_hits, entity_list, min_pe
     return false;
 end
 
-return
-{
-    get_target_list = get_target_list,
-    get_target_selector_data = get_target_selector_data,
 
+local function get_current_selected_position()
+    return get_selected_position()
+end
+
+return {
+    get_target_selector_data = get_target_selector_data,
+    get_target_list = get_target_list,
+    set_targeting_mode = set_targeting_mode,
+    get_current_selected_position = get_current_selected_position,
     get_most_hits_rectangle = get_most_hits_rectangle,
     get_most_hits_circular = get_most_hits_circular,
 

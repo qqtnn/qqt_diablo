@@ -28,43 +28,42 @@ local function is_action_allowed()
     local local_player = get_local_player();
     if not local_player then
         return false
-    end
-
+    end  
+    
     local player_position = local_player:get_position();
     if evade.is_dangerous_position(player_position) then
         return false;
     end
-
+ 
     local busy_spell_id_1 = 197833
     local active_spell_id = local_player:get_active_spell_id()
     if active_spell_id == busy_spell_id_1 then
         return false
     end
-
+  
     local is_mounted = false;
     local is_blood_mist = false;
     local is_shrine_conduit = false;
     local local_player_buffs = local_player:get_buffs();
     for _, buff in ipairs(local_player_buffs) do
-
           -- console.print("buff name ", buff:name());
           -- console.print("buff hash ", buff.name_hash);
-        if buff.name_hash == blood_mist_buff_name_hash_c then
-            is_blood_mist = true;
-            break;
-        end
-
-        if buff.name_hash == mount_buff_name_hash_c then
+          if buff.name_hash == blood_mist_buff_name_hash_c then
+              is_blood_mist = true;
+              break;
+          end
+  
+          if buff.name_hash == mount_buff_name_hash_c then
             is_mounted = true;
-            break;
-        end
-
-        if buff.name_hash == shrine_conduit_buff_name_hash_c then
+              break;
+          end
+  
+          if buff.name_hash == shrine_conduit_buff_name_hash_c then
             is_shrine_conduit = true;
-            break;
-        end
+              break;
+          end
     end
-
+  
       -- do not make any actions while in blood mist
       if is_blood_mist or is_mounted or is_shrine_conduit then
           -- console.print("Blocking Actions for Some Buff");
@@ -95,8 +94,8 @@ local function is_spell_allowed(spell_enable_check, next_cast_allowed_time, spel
 
 
     -- "Combo & Clear", "Combo Only", "Clear Only"
-    -- local current_cast_mode = spell_cast_mode
-
+    local current_cast_mode = spell_cast_mode
+    
     -- evade abort
     local local_player = get_local_player();
     if local_player then
@@ -104,7 +103,7 @@ local function is_spell_allowed(spell_enable_check, next_cast_allowed_time, spel
         if evade.is_dangerous_position(player_position) then
             return false;
         end
-    end
+    end    
 
     -- -- automatic
     -- if current_cast_mode == 4 then
@@ -120,7 +119,7 @@ local function is_spell_allowed(spell_enable_check, next_cast_allowed_time, spel
     -- local is_clear_only = current_cast_mode == 2
 
     local current_orb_mode = orbwalker.get_orb_mode()
-
+    
     if current_orb_mode == orb_mode.none then
         return false
     end
@@ -128,7 +127,7 @@ local function is_spell_allowed(spell_enable_check, next_cast_allowed_time, spel
     local is_current_orb_mode_pvp = current_orb_mode == orb_mode.pvp
     local is_current_orb_mode_clear = current_orb_mode == orb_mode.clear
     -- local is_current_orb_mode_flee = current_orb_mode == orb_mode.flee
-
+    
     -- if is_pvp_only and not is_current_orb_mode_pvp then
     --     return false
     -- end
@@ -178,8 +177,8 @@ local function get_best_point(target_position, circle_radius, current_hit_list)
         end
 
         table.insert(hit_table, {
-            point = point,
-            hits = #hit_list_collision_less,
+            point = point, 
+            hits = #hit_list_collision_less, 
             victim_list = hit_list_collision_less
         });
     end
@@ -191,7 +190,7 @@ local function get_best_point(target_position, circle_radius, current_hit_list)
     if hit_table[1].hits > current_hit_list_amount then
         return hit_table[1]; -- returning the point with the most hits
     end
-
+    
     return {point = target_position, hits = current_hit_list_amount, victim_list = current_hit_list};
 end
 
@@ -251,7 +250,41 @@ local function elites_in_shouts()
     return units
 end
 
-local function units_in_shouts()
+local function should_pop_cds()
+    local player_position = get_player_position();
+    local enemies = actors_manager.get_enemy_npcs();
+    local elite_units = 0;
+    local champion_units = 0;
+    local boss_units = 0;
+    local elite_positions = {};
+    local champion_positions = {};
+    local boss_positions = {};
+
+    for _, obj in ipairs(enemies) do
+        local position = obj:get_position();
+        local distance = position:dist_to(player_position);
+        local is_close = distance < 8.0;
+
+        if not is_close then
+            -- Skip this enemy and continue with the next one
+            goto continue
+        end;
+        if obj:is_elite() then
+            elite_units = elite_units + 1;
+            table.insert(elite_positions, position);
+        elseif obj:is_champion() then
+            champion_units = champion_units + 1;
+            table.insert(champion_positions, position);
+        elseif obj:is_boss() then
+            boss_units = boss_units + 1;
+            table.insert(boss_positions, position);
+        end;
+        ::continue::
+    end;
+    return elite_units, champion_units, boss_units, elite_positions, champion_positions, boss_positions
+end
+
+local function steel_grasp_units()
     local player_position = get_player_position();
     local enemies = actors_manager.get_enemy_npcs();
     local elite_units = 0;
@@ -279,6 +312,30 @@ local function units_in_shouts()
     return elite_units, champion_units, boss_units
 end
 
+local function count_and_display_buffs()
+    local local_player = get_local_player()
+    if not local_player then return end
+
+    local buffs = local_player:get_buffs()
+    if not buffs then return end
+
+    local bash_passive_count = 0
+
+    for _, buff in ipairs(buffs) do
+        local buff_name = buff:name()
+        if buff_name == "Barbarian_Bash_Passive" then
+            bash_passive_count = bash_passive_count + 1
+        end
+    end
+
+    if bash_passive_count == 1 then
+        console.print_full(0.2, 1.0, "BASH PASSIVE NOT READY")
+    elseif bash_passive_count == 2 then
+        console.print_full(0.2, 1.0, "BASH PASSIVE READY ABOUT TO SLAMDUNK!!")
+    end
+    return bash_passive_count
+end
+
 
 local plugin_label = "BASE_WARRIOR_PLUGIN_"
 
@@ -301,5 +358,6 @@ return
     get_best_point_rec = get_best_point_rec,
 
     elites_in_shouts = elites_in_shouts,
-    units_in_shouts = units_in_shouts,
+    should_pop_cds = should_pop_cds,
+    count_and_display_buffs = count_and_display_buffs,
 }

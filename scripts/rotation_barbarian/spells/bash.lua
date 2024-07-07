@@ -5,31 +5,41 @@ local menu_elements_bash_base =
     tree_tab            = tree_node:new(1),
     main_boolean        = checkbox:new(true, get_hash(my_utility.plugin_label .. "bash_base_main_bool")),
     use_as_filler_only  = checkbox:new(false, get_hash(my_utility.plugin_label .. "use_as_filler_only_bashbase_2")),
+    bash_count          = slider_int:new(1, 10, 8, get_hash(my_utility.plugin_label .. "bash_count_2")),
     spell_range       = slider_float:new(0.5, 3.0, 1.60, get_hash(my_utility.plugin_label .. "bash_spell_range_2")),
     max_angle       = slider_int:new(45, 180, 180, get_hash(my_utility.plugin_label .. "bash_spell_max_angle_2"))
 }
 
 local function menu()
-    
-    if menu_elements_bash_base.tree_tab:push("Bash")then
-        menu_elements_bash_base.main_boolean:render("Enable Spell", "")
+    local elements = {}
 
-        if menu_elements_bash_base.main_boolean:get() then
-            menu_elements_bash_base.use_as_filler_only:render("Filler Only", "Prevent casting with a lot of fury")
-            menu_elements_bash_base.spell_range:render("Spell Range", "", 2)
-            menu_elements_bash_base.max_angle:render("Max Angle", "")
-         end
- 
-         menu_elements_bash_base.tree_tab:pop()
+    if menu_elements_bash_base.tree_tab:push("Bash") then
+        elements.main_boolean = menu_elements_bash_base.main_boolean
+        elements.main_boolean:render("Enable Spell", "")
+
+        if elements.main_boolean:get() then
+            elements.use_as_filler_only = menu_elements_bash_base.use_as_filler_only
+            elements.use_as_filler_only:render("Filler Only", "Prevent casting with a lot of fury")
+
+            elements.spell_range = menu_elements_bash_base.spell_range
+            elements.spell_range:render("Spell Range", "", 2)
+
+            elements.max_angle = menu_elements_bash_base.max_angle
+            elements.max_angle:render("Max Angle", "")
+        end
+
+        menu_elements_bash_base.tree_tab:pop()
     end
+
+    return elements
 end
 
 local spell_id_bash = 200765;
-
-
 local next_time_allowed_cast = 0.0;
+
+local bash_counter = 0
 local function logics(entity_list)
-    
+    --#region spell_data
     local spell_data_bash = spell_data:new(
     menu_elements_bash_base.spell_range:get(),                        -- radius
     menu_elements_bash_base.spell_range:get(),                        -- range
@@ -42,10 +52,12 @@ local function logics(entity_list)
     targeting_type.targeted    --targeting_type
 )
 
+    --#endregion
+
     local menu_boolean = menu_elements_bash_base.main_boolean:get();
     local is_logic_allowed = my_utility.is_spell_allowed(
-                menu_boolean, 
-                next_time_allowed_cast, 
+                menu_boolean,
+                next_time_allowed_cast,
                 spell_id_bash);
 
     if not is_logic_allowed then
@@ -54,7 +66,7 @@ local function logics(entity_list)
 
     local player_local = get_local_player();
 
-    local is_filler_enabled = menu_elements_bash_base.use_as_filler_only:get();  
+    local is_filler_enabled = menu_elements_bash_base.use_as_filler_only:get();
     if is_filler_enabled then
         local current_resource_ws = player_local:get_primary_resource_current();
         local max_resource_ws = player_local:get_primary_resource_max();
@@ -65,13 +77,11 @@ local function logics(entity_list)
             return false;
         end
     end;
-    
+
     local spell_range = menu_elements_bash_base.spell_range:get()
     local player_position = get_player_position();
     local cursor_position = get_cursor_position();
 
-    local is_auto_play_active = auto_play.is_active();
-    
     local filtered_entities = {}
     for _, target in ipairs(entity_list) do
         local target_position = target:get_position()
@@ -91,30 +101,34 @@ local function logics(entity_list)
         end
     end
 
-    if is_auto_play_active then
-        
-    else
-
         table.sort(filtered_entities, function(a, b) return a.angle < b.angle end)
-    end
-    
     local target = filtered_entities[1] and filtered_entities[1].entity
-
     if target then
         if cast_spell.target(target, spell_data_bash, false) then
+
             local current_time = get_time_since_inject();
-        next_time_allowed_cast = current_time + 0.15;
+            next_time_allowed_cast = current_time + 0.15;
+            bash_counter = bash_counter + 1
             console.print("Casted Bash")
-            return true
+            return true, bash_counter
         end
+        return bash_counter
     end
-            
-    return false;
+    return false, bash_counter
 end
 
+local function get_bash_counter()
+    return bash_counter
+end
 
-return 
-{
+local function reset_bash_counter()
+    bash_counter = 0
+end
+
+return {
     menu = menu,
-    logics = logics,   
+    logics = logics,
+    bash_counter = bash_counter,
+    get_bash_counter = get_bash_counter,
+    reset_bash_counter = reset_bash_counter
 }

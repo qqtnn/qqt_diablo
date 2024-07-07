@@ -1,26 +1,27 @@
 local my_utility = require("my_utility/my_utility")
+local bash = require("spells/bash")
 
 local menu_elements_steel_grasp =
 {
     tree_tab              = tree_node:new(1),
     main_boolean          = checkbox:new(true, get_hash(my_utility.plugin_label .. "main_boolean_grasp_steel_b_pos")),
-   
-    trap_mode         = combo_box:new(0, get_hash(my_utility.plugin_label .. "grasp_steel_b_base_pos")),
+
+    trap_mode             = combo_box:new(0, get_hash(my_utility.plugin_label .. "grasp_steel_b_base_pos")),
     keybind               = keybind:new(0x01, false, get_hash(my_utility.plugin_label .. "grasp_steel_b_keybind_pos")),
     keybind_ignore_hits   = checkbox:new(true, get_hash(my_utility.plugin_label .. "keybind_ignore_min_hitsgrasp_steel_b_pos")),
 
     min_hits              = slider_int:new(1, 20, 4, get_hash(my_utility.plugin_label .. "min_hits_to_castgrasp_steel_b_pos")),
-    
+
     allow_percentage_hits = checkbox:new(true, get_hash(my_utility.plugin_label .. "allow_percentage_hits_grasp_steel_b_pos")),
     min_percentage_hits   = slider_float:new(0.1, 1.0, 0.50, get_hash(my_utility.plugin_label .. "min_percentage_hits_grasp_steel_b_pos")),
     soft_score            = slider_float:new(0.50, 15.0, 6.0, get_hash(my_utility.plugin_label .. "min_percentage_hits_grasp_steel_b_soft_core_pos")),
 
-    spell_range   = slider_float:new(1.0, 15.0, 8.0, get_hash(my_utility.plugin_label .. "poison_trap_spell_range")),
-    spell_radius   = slider_float:new(0.50, 5.0, 3.25, get_hash(my_utility.plugin_label .. "poison_trap_spell_radius")),
+    spell_range           = slider_float:new(1.0, 15.0, 8.0, get_hash(my_utility.plugin_label .. "poison_trap_spell_range")),
+    spell_radius          = slider_float:new(0.50, 5.0, 3.25, get_hash(my_utility.plugin_label .. "poison_trap_spell_radius")),
 }
 
 local function menu()
-    
+
     if menu_elements_steel_grasp.tree_tab:push("Steel Grasp") then
         menu_elements_steel_grasp.main_boolean:render("Enable Spell", "");
 
@@ -36,7 +37,7 @@ local function menu()
         if menu_elements_steel_grasp.allow_percentage_hits:get() then
             menu_elements_steel_grasp.min_percentage_hits:render("Min Percentage Hits", "", 2);
             menu_elements_steel_grasp.soft_score:render("Soft Score", "", 2);
-        end       
+        end
 
         menu_elements_steel_grasp.spell_range:render("Spell Range", "", 2)
         menu_elements_steel_grasp.spell_radius:render("Spell Radius", "", 2)
@@ -63,8 +64,8 @@ local next_time_allowed_cast = 0.0;
 local function logics(entity_list, target_selector_data, best_targetrget)
     local menu_boolean = menu_elements_steel_grasp.main_boolean:get();
    local is_logic_allowed = my_utility.is_spell_allowed(
-                menu_boolean, 
-                next_time_allowed_cast, 
+                menu_boolean,
+                next_time_allowed_cast,
                 spell_id_steel_grasp);
 
     if not is_logic_allowed then
@@ -75,7 +76,7 @@ local function logics(entity_list, target_selector_data, best_targetrget)
     local keybind_used = menu_elements_steel_grasp.keybind:get_state();
     local trap_mode = menu_elements_steel_grasp.trap_mode:get();
     if trap_mode == 1 then
-        if  keybind_used == 0 then   
+        if  keybind_used == 0 then
             return false;
         end;
     end;
@@ -84,7 +85,7 @@ local function logics(entity_list, target_selector_data, best_targetrget)
     local keybind_can_skip = keybind_ignore_hits == true and keybind_used > 0;
     -- console.print("keybind_can_skip " .. tostring(keybind_can_skip))
     -- console.print("keybind_used " .. keybind_used)
-    
+
     local is_percentage_hits_allowed = menu_elements_steel_grasp.allow_percentage_hits:get();
     local min_percentage = menu_elements_steel_grasp.min_percentage_hits:get();
     if not is_percentage_hits_allowed then
@@ -105,7 +106,7 @@ local function logics(entity_list, target_selector_data, best_targetrget)
     -- console.print("1111")
     if not is_area_valid and not keybind_can_skip  then
         return false;
-    end    
+    end
 
     if not area_data.main_target:is_enemy() then
         return false;
@@ -128,7 +129,7 @@ local function logics(entity_list, target_selector_data, best_targetrget)
 
     local main_target_position = area_data.main_target:get_position()
     local best_cast_data = my_utility.get_best_point(main_target_position, spell_radius, area_data.victim_list);
- 
+
     -- Initialize variables to store the closest target to the point
     local closer_target_to_zone = nil
     local closest_distance_sqr = math.huge
@@ -137,12 +138,18 @@ local function logics(entity_list, target_selector_data, best_targetrget)
     for _, victim in ipairs(best_cast_data.victim_list) do
         local victim_position = victim:get_position()
         local distance_sqr = main_target_position:squared_dist_to_ignore_z(victim_position)
-        
+
         -- If the distance to the current victim is less than the closest distance so far, update the closest target
         if distance_sqr < closest_distance_sqr then
             closer_target_to_zone = victim
             closest_distance_sqr = distance_sqr
         end
+    end
+
+    local player_position = get_player_position()
+    local is_wall_collision = target_selector.is_wall_collision(player_position, closer_target_to_zone, 1.20);
+    if is_wall_collision then
+        return false;
     end
 
     -- Cast the spell targeting the best_target with steel_grasp_spell_data if there's a closer target
@@ -160,8 +167,8 @@ local function logics(entity_list, target_selector_data, best_targetrget)
 end
 
 
-return 
+return
 {
     menu = menu,
-    logics = logics,   
+    logics = logics,
 }
