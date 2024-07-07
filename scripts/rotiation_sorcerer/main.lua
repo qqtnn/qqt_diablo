@@ -36,6 +36,7 @@ local spells =
     inferno                 = require("spells/inferno"),
     frost_nova              = require("spells/frost_nova"),
     arc_lash                = require("spells/arc_lash"),
+    incinerate              = require("spells/incinerate"),
     chain_lightning         = require("spells/chain_lightning")
 }
 
@@ -46,6 +47,10 @@ on_render_menu (function ()
     end;
 
     menu.main_boolean:render("Enable Plugin", "");
+    menu.immortal_boolean:render("Immortal Firebolt Sorc", "Needs 50 percent or higher Cooldown Reduction to work properly");
+    if menu.immortal_boolean:get() then
+        menu.immortal_drawings:render("Info Text", "Draws Immortal Firebolt Sorc related information");
+    end
 
     if menu.main_boolean:get() == false then
         menu.main_tree:pop();
@@ -56,6 +61,7 @@ on_render_menu (function ()
     spells.spark.menu();
     spells.frost_bolt.menu();
     spells.fire_bolt.menu();
+    spells.incinerate.menu();
     spells.arc_lash.menu();
     spells.fireball.menu();
     spells.frozen_orb.menu();
@@ -111,17 +117,20 @@ on_update(function ()
         return;
     end  
 
-    -- local local_player_buffs = local_player:get_buffs();
-    -- for _, buff in ipairs(local_player_buffs) do
-    --     --   console.print("buff name ", buff:name());
-    --     --   console.print("buff hash ", buff.name_hash);
+    local local_player_buffs = local_player:get_buffs();
+    for _, buff in ipairs(local_player_buffs) do
+        --   console.print("buff name ", buff:name());
+        --   console.print("buff hash ", buff.name_hash);
+          if buff.name_hash == blood_mist_buff_name_hash_c then
+              is_blood_mist = true;
+              break;
+          end
+    end
 
-    -- end
-
-    local screen_range = 16.0;
+    local screen_range = 12.0;
     local player_position = get_player_position();
 
-    local collision_table = { false, 2.0 };
+    local collision_table = { true, 1.0 };
     local floor_table = { true, 5.0 };
     local angle_table = { false, 90.0 };
 
@@ -136,12 +145,92 @@ on_update(function ()
         player_position, 
         entity_list);
 
+    local enemies_nearby = target_selector_data.is_valid or (best_target_position and best_target_position:squared_dist_to_ignore_z(player_position) > (8 * 8))
+    -- Imortal Sorc
+    local time_left = nil
+    if menu.immortal_boolean:get() then
+        local cursor_pos = get_cursor_position()
+        local valid_height_cursor_pos = utility.set_height_of_valid_position(cursor_pos)
+        local current_orb_mode = orbwalker.get_orb_mode();
+
+        -- flame_shield
+        if local_player:is_spell_ready(167341) then
+            if current_orb_mode == orb_mode.none then
+                return;
+            end
+            if current_orb_mode ~= orb_mode.none then
+                local shield_time = get_time_since_inject()
+                local next_shield_cast = 0.0
+                if next_shield_cast > shield_time then
+                    return;
+                end
+                if cast_spell.self(167341, 0.0) then
+                    next_shield_cast = shield_time + 4.0
+                    return;
+                end
+            end
+            return;
+        end;
+        -- check if player has flame shield buff, if not, cast flameshield if orb mode does not equal none
+        -- local has_flame_shield = false
+        -- for _, buff in ipairs(local_player_buffs) do
+        --     if buff.name_hash == 167341 then
+        --         has_flame_shield = true
+        --         break
+        --     end
+        -- end
+        -- if not has_flame_shield then
+        --     if local_player:is_spell_ready(167341) then
+        --         if current_orb_mode == orb_mode.none then
+        --             return;
+        --         end
+        --         if (current_orb_mode ~= orb_mode.none) or target_selector_data.is_valid then
+        --             cast_spell.self(167341, 0.0);
+        --             return;
+        --         end
+        --         return;
+        --     end;
+        -- end
+
+        -- teleport_ench
+        if spells.teleport_ench.menu_elements_teleport_ench.enchant_jmr_logic:get() then
+            if local_player:is_spell_ready(959728) then
+                if current_orb_mode == orb_mode.none then
+                    return;
+                end
+                if current_orb_mode ~= orb_mode.none then
+                    cast_spell.position(959728, valid_height_cursor_pos, 0.0);
+                    return;
+                end
+                return;
+            end;
+        end
+       
+
+        -- fire_bolt
+        if spells.fire_bolt.menu_elements_fire_bolt.jmr_logic:get() then
+            if not enemies_nearby then
+                if local_player:is_spell_ready(153249) then
+                    if current_orb_mode == orb_mode.none then
+                        return;
+                    end
+                    if current_orb_mode ~= orb_mode.none then
+                        cast_spell.position(153249, valid_height_cursor_pos, 0.0);
+                        return;
+                    end
+                    return;
+                end;
+            end;
+        end
+        
+    end;
+
     if not target_selector_data.is_valid then
         return;
     end
 
     local is_auto_play_active = auto_play.is_active();
-    local max_range = 10.0;
+    local max_range = 12.0;
     if is_auto_play_active then
         max_range = 12.0;
     end
@@ -175,9 +264,12 @@ on_update(function ()
         end
     end   
 
+    local best_target = target_selector_data.closest_unit;
+
     if not best_target then
         return;
     end
+
 
     local best_target_position = best_target:get_position();
     local distance_sqr = best_target_position:squared_dist_to_ignore_z(player_position);
@@ -190,7 +282,74 @@ on_update(function ()
             return;
         end
     end
+    if menu.immortal_boolean:get() then
+        local current_orb_mode = orbwalker.get_orb_mode();  
 
+        local function count_and_display_buffs()
+            local local_player = get_local_player()
+            local buff_name_check = "Ring_Unique_Sorc_101"
+            if not local_player then return 0 end
+
+            local buffs = local_player:get_buffs()
+            if not buffs then return 0 end
+
+            local buff_stack_count = -1
+
+            for _, buff in ipairs(buffs) do
+                local buff_name = buff:name()
+                if buff_name == buff_name_check then
+                    buff_stack_count = buff_stack_count + 1
+                end
+            end
+            return buff_stack_count
+        end
+
+        local buff_stack_count = count_and_display_buffs()
+
+        -- frostbolt for tal rasha
+        if buff_stack_count == 3 and enemies_nearby then
+            local local_player = get_local_player()
+            if local_player:is_spell_ready(287256) then
+                if current_orb_mode == orb_mode.none then
+                    return;
+                end
+                if current_orb_mode ~= orb_mode.none then
+                    cast_spell.position(287256, best_target_position, 0.0);
+                    return;
+                end
+                return;
+            end;
+        end;
+        -- auto attack exploit for 4 stacks
+        -- if buff_stack_count == 4 and best_target:get_position():squared_dist_to_ignore_z(player_position) < 2 then
+        --     if local_player:is_spell_ready(1201192) then
+        --         if current_orb_mode == orb_mode.none then
+        --             return;
+        --         end
+        --         if current_orb_mode ~= orb_mode.none then
+        --             cast_spell.position(1201192, best_target_position, 0.0);
+        --             return;
+        --         end
+        --         return;
+        --     end;
+        -- end;
+    end
+
+    local function should_firewall()
+        local actors = actors_manager.get_all_actors()
+        for _, actor in ipairs(actors) do
+            local actor_name = actor:get_skin_name()
+            if actor_name == "Generic_Proxy_firewall" then
+                local actor_position = actor:get_position()
+                local dx = math.abs(best_target_position:x() - actor_position:x())
+                local dy = math.abs(best_target_position:y() - actor_position:y())    
+                if dx <= 2 and dy <= 8 then  -- rectangle width is 2 and height is 8
+                    return false
+                end
+            end
+        end
+        return true
+    end
     -- spells logics begins:
     -- if local_player:is_spell_ready(959728) then
     --     console.print("spell is ready")
@@ -199,6 +358,7 @@ on_update(function ()
     -- if not local_playeris_spell_ready(959728) then
     --     console.print("spell is not ready")
     -- end
+
 
     if spells.deep_freeze.logics()then
         cast_end_time = current_time + 4.0;
@@ -230,13 +390,18 @@ on_update(function ()
         return;
     end;
 
+    if spells.incinerate.logics(best_target)then
+        cast_end_time = current_time + 0.1;
+        return;
+    end;
+
     if spells.frost_nova.logics()then
         cast_end_time = current_time + 0.2;
         return;
     end;
 
     if spells.flame_shield.logics()then
-        cast_end_time = current_time + 0.2;
+        cast_end_time = current_time;
         return;
     end;
 
@@ -245,8 +410,12 @@ on_update(function ()
         return;
     end;
 
+    if should_firewall and spells.firewall.logics(local_player, best_target)then
+        cast_end_time = current_time;
+    end
+
     if spells.teleport_ench.logics(best_target)then
-        cast_end_time = current_time + 0.2;
+        cast_end_time = current_time;
         return;
     end;
 
@@ -256,7 +425,7 @@ on_update(function ()
     -- end;
 
     if spells.teleport.logics(entity_list, target_selector_data, best_target)then
-        cast_end_time = current_time + 0.2;
+        cast_end_time = current_time;
         return;
     end;
 
@@ -275,23 +444,13 @@ on_update(function ()
         return;
     end;
 
-    if spells.fire_bolt.logics(best_target)then
-        cast_end_time = current_time + 0.2;
-        return;
-    end;
-
-    if spells.frost_bolt.logics(best_target)then
-        cast_end_time = current_time + 0.2;
-        return;
-    end;
-
     if spells.spark.logics(best_target)then
         cast_end_time = current_time + 0.3;
         return;
     end;
 
     if spells.fireball.logics(best_target)then
-        cast_end_time = current_time + 0.3;
+        cast_end_time = current_time;
         return;
     end;
 
@@ -320,9 +479,15 @@ on_update(function ()
         return;
     end;
 
-    if spells.firewall.logics(best_target)then
-        cast_end_time = current_time + 0.3;
-    end
+    if spells.fire_bolt.logics(best_target)then
+        cast_end_time = current_time;
+        return;
+    end;
+    
+    if spells.frost_bolt.logics(best_target)then
+        cast_end_time = current_time + 0.2;
+        return;
+    end;
     
     -- auto play engage far away monsters
     local move_timer = get_time_since_inject()
@@ -381,6 +546,68 @@ on_render(function ()
         return;
     end
 
+    local function count_and_display_buffs()
+        local local_player = get_local_player()
+        local player_position = get_player_position()
+        local player_position_2d = graphics.w2s(player_position)
+        local text_position = vec2.new(player_position_2d.x, player_position_2d.y + 15)
+        local buff_name_check = "Ring_Unique_Sorc_101"
+        if not local_player then return 0 end
+
+        local buffs = local_player:get_buffs()
+        if not buffs then return 0 end
+
+        local buff_stack_count = -1
+
+        for _, buff in ipairs(buffs) do
+            local buff_name = buff:name()
+            if buff_name == buff_name_check then
+                buff_stack_count = buff_stack_count + 1
+            end
+        end
+        return buff_stack_count
+    end
+
+    local buff_stack_count = count_and_display_buffs()
+    if menu.immortal_boolean:get() and menu.immortal_drawings:get() then
+        if buff_stack_count == -1 then
+            graphics.text_2d("Immortal Firebolt Sorc Loaded but you do not have Tal Rasha equipped", player_screen_position, 20, color_red(255), true, true);
+        end
+        if buff_stack_count >= 1 then
+            -- print Tal Rasha buff stack is currently at buff_stack_count
+            graphics.text_2d("Immortal Firebolt Sorc Loaded with Tal Rasha buff stack at " .. buff_stack_count - 1, player_screen_position, 20, color_green(255), true, true);
+        end
+        if buff_stack_count == 3 then
+            -- print Tal Rasha needs Frost Bolt to gain stack. CASTING FROST Bolt
+            graphics.text_2d("Immortal Firebolt Sorc Loaded with Tal Rasha buff stack at 2", vec2:new(player_screen_position.x, player_screen_position.y + 20), 20, color_cyan(255), true, true);
+            graphics.text_2d("Casting Frost Bolt to gain stack", vec2:new(player_screen_position.x, player_screen_position.y + 40), 20, color_cyan(255), true, true);
+        end
+        -- Immortal sorc needs 165023(Fireball, 959728(Teleport Enchantment), 111422(Firewall), 153249(Firebolt), 167341(Flame Shield) and 287256(Frostbolt) to work properly
+        -- place needed spells into a list. check if the spells are equipped. If a spell is not equipped, display a message that the spell name is not equipped
+        local needed_spells = {165023, 111422, 153249, 167341, 287256}
+        local spell_ids = get_equipped_spell_ids() -- Returns a table of 6 spell IDs
+
+        -- Convert spell_ids to a set for faster lookup
+        local spell_ids_set = {}
+        for _, id in ipairs(spell_ids) do
+            spell_ids_set[id] = true
+        end
+
+        for i, spell_id in ipairs(needed_spells) do
+            local spell_name = "Unknown Spell"
+
+            if spell_id > 1 then
+                spell_name = get_name_for_spell(spell_id);
+            end
+            
+            -- Check if the spell is missing
+            if not spell_ids_set[spell_id] then
+                local missing_spell_info = string.format("%s is missing and is needed for Immortal Firebolt Sorc", spell_name)
+                graphics.text_2d(missing_spell_info, vec2:new(player_screen_position.x, 200 + 20 * (i + #needed_spells)), 20, color_red(255))
+            end
+        end
+    end
+
     if draw_player_circle then
         graphics.circle_3d(player_position, 8, color_white(85), 3.5, 144)
         graphics.circle_3d(player_position, 6, color_white(85), 2.5, 144)
@@ -405,10 +632,10 @@ on_render(function ()
 
     -- glow target -- quick pasted code cba about this game
 
-    local screen_range = 16.0;
+    local screen_range = 12.0;
     local player_position = get_player_position();
 
-    local collision_table = { false, 2.0 };
+    local collision_table = { true, 1.0 };
     local floor_table = { true, 5.0 };
     local angle_table = { false, 90.0 };
 
@@ -428,7 +655,7 @@ on_render(function ()
     end
 
     local is_auto_play_active = auto_play.is_active();
-    local max_range = 10.0;
+    local max_range = 12.0;
     if is_auto_play_active then
         max_range = 12.0;
     end

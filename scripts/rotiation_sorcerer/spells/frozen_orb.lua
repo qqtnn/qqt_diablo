@@ -27,7 +27,10 @@ local frozen_orb_data = spell_data:new(
     spell_geometry.circular, -- geometry_type
     targeting_type.skillshot    --targeting_type
 )
+
 local next_time_allowed_cast = 0.0;
+
+---@param target game.object
 local function logics(target)
     
     local menu_boolean = frozen_orb_menu_elements.main_boolean:get();
@@ -40,15 +43,22 @@ local function logics(target)
         return false;
     end;
 
-    local player_local = get_local_player();
+    -- local player_local = get_local_player();
+    if not target:is_boss() and not target:is_elite() and not target:is_champion() then
+        return false;
+    end
     
     local player_position = get_player_position();
     local target_position = target:get_position();
+    local is_collision = prediction.is_wall_collision(player_position, target_position, 1.5)
+    if is_collision then
+        return false
+    end
 
     if cast_spell.target(target, frozen_orb_data, false) then
 
         local current_time = get_time_since_inject();
-        next_time_allowed_cast = current_time + 0.6;
+        next_time_allowed_cast = current_time + 0.4;
 
         console.print("Sorc Plugin, Casted Frozen Orb");
         return true;

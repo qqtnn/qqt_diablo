@@ -106,15 +106,22 @@ local function get_target_selector_data(source, list)
     for _, unit in ipairs(possible_targets_list) do
         local unit_position = unit:get_position()
         local distance_sqr = unit_position:squared_dist_to_ignore_z(source)
-
+        local cursor_pos = get_cursor_position()
+        local player_position = get_player_position()
         local max_health = unit:get_max_health()
         local current_health = unit:get_current_health()
 
         -- update units data
-        if distance_sqr < closest_unit_distance then
+        if unit_position:dist_to(cursor_pos) <= 1 then
+            closest_unit = unit;
+            closest_unit_distance = distance_sqr;
+        elseif distance_sqr < closest_unit_distance then
             closest_unit = unit;
             closest_unit_distance = distance_sqr;
             is_valid = true;
+        elseif unit_position:dist_to(cursor_pos) < 2 then
+            closest_unit = unit;
+            closest_unit_distance = distance_sqr;
         end
 
         if current_health < lowest_current_health_unit_health then
@@ -285,8 +292,8 @@ local function get_target_list(source, range, collision_table, floor_table, angl
         local unit_position = unit:get_position()
 
         if floor_table.is_enabled then
-            local z_difference = math.abs(source.z() - unit_position:z())
-            local is_other_floor = z_difference > floor_table.height
+            local x_difference = math.abs(source.x() - unit_position.x())
+            local is_other_floor = x_difference > floor_table.height
         
             if is_other_floor then
                 goto continue
@@ -294,8 +301,8 @@ local function get_target_list(source, range, collision_table, floor_table, angl
         end
 
         if angle_table.is_enabled then
-            local cursor_position = get_cursor_position();
-            local angle = unit_position:get_angle(cursor_position, source);
+            local cursor_position = cursor_pos();
+            local angle = unit_position.angle(cursor_position, source);
             local is_outside_angle = angle > floor_table.max_angle
         
             if is_outside_angle then
@@ -329,7 +336,7 @@ local function get_most_hits_rectangle(source, lenght, width)
     end
 
     local main_target = data.main_target;
-    is_valid = hits_amount > 0 and main_target ~= nil;
+    is_valid = hits_amount > 0 and main_target;
     return
     {
         is_valid = is_valid,
@@ -361,7 +368,7 @@ local function get_most_hits_circular(source, distance, radius)
     end
 
     local main_target = data.main_target;
-    is_valid = hits_amount > 0 and main_target ~= nil;
+    is_valid = hits_amount > 0 and main_target;
     return
     {
         is_valid = is_valid,
@@ -402,17 +409,26 @@ local function is_valid_area_spell_smart(area_table, min_hits)
     return false;
 end
 
-local function is_valid_area_spell_percentage(area_table, entity_list, min_percentage)
+local function get_area_percentage(area_table, entity_list)
     if not area_table.is_valid then
-        return false;
+        return 0.0
     end
     
     local entity_list_size = #entity_list;
     local hits_amount = area_table.hits_amount;
     local percentage = hits_amount / entity_list_size;
+    return percentage
+end
+
+local function is_valid_area_spell_percentage(area_table, entity_list, min_percentage)
+    if not area_table.is_valid then
+        return false;
+    end
+    
+    local percentage = get_area_percentage(area_table, entity_list)
     if percentage >= min_percentage then
         return true;
-    end    
+    end
 end
 
 

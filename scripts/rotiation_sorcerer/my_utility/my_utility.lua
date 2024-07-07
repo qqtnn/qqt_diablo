@@ -94,7 +94,7 @@ local function is_spell_allowed(spell_enable_check, next_cast_allowed_time, spel
 
 
     -- "Combo & Clear", "Combo Only", "Clear Only"
-    -- local current_cast_mode = spell_cast_mode
+    local current_cast_mode = spell_cast_mode
     
     -- evade abort
     local local_player = get_local_player();
@@ -237,7 +237,6 @@ local function get_best_point_rec(target_position, rectangle_radius, width, curr
 
     return {point = target_position, hits = current_hit_list_amount, victim_list = current_hit_list}
 end
-
 
 local plugin_label = "BASE_SORCERER_PLUGIN_"
 

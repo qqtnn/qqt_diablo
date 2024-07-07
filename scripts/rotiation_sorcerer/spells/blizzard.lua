@@ -123,10 +123,10 @@ local function logics(target)
     --end
 
 
-    local current_time = get_time_since_inject()
     local best_cast_position = best_cast_data.point;
     if cast_spell.position(spell_id_blizzard, best_cast_position, 0.40) then
         console.print("Sorcerer Plugin, Casted Blizzard, Target " .. best_target:get_skin_name() .. " Hits: " .. best_cast_hits);
+        local current_time = get_time_since_inject();
         next_time_allowed_cast = current_time + 0.3; -- fixed an oopsie that chaser did where he wrote time instead of current_time
         return true;
     end

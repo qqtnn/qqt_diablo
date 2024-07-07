@@ -4,12 +4,14 @@ local menu_elements_teleport_ench =
 {
     tree_tab            = tree_node:new(1),
     main_boolean        = checkbox:new(true, get_hash(my_utility.plugin_label .. "base_teleport_ench_base_main_bool")),
+    enchant_jmr_logic        = checkbox:new(true, get_hash(my_utility.plugin_label .. "base_teleport_ench_enchant_jmr_logic_bool")),
 }
 
 local function menu()
     
     if menu_elements_teleport_ench.tree_tab:push("teleport_ench")then
         menu_elements_teleport_ench.main_boolean:render("Enable Spell", "")
+        menu_elements_teleport_ench.enchant_jmr_logic:render("Enable JMR Logic", "")
  
         menu_elements_teleport_ench.tree_tab:pop()
     end
@@ -30,7 +32,7 @@ local spell_data_teleport_ench = spell_data:new(
 local next_time_allowed_cast = 0.0;
 local_player = get_local_player();
 local function logics(target)
-    
+    local_player = get_local_player();
     local menu_boolean = menu_elements_teleport_ench.main_boolean:get();
     local is_logic_allowed = my_utility.is_spell_allowed(
                 menu_boolean, 
@@ -38,6 +40,10 @@ local function logics(target)
                 spell_id_teleport_ench);
 
     local current_orb_mode = orbwalker.get_orb_mode()
+
+    if not menu_boolean then
+        return false
+    end
 
     if current_orb_mode == orb_mode.none then
         return false
@@ -69,4 +75,5 @@ return
 {
     menu = menu,
     logics = logics,   
+    menu_elements_teleport_ench = menu_elements_teleport_ench,
 }

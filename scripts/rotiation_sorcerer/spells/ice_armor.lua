@@ -40,7 +40,7 @@ local function logics()
     local health_percentabe = player_current_health / player_max_health;
     local menu_min_percentage = menu_elements_sorc_base.hp_usage_shield:get();
 
-    if health_percentabe > menu_min_percentage then
+    if health_percentabe > menu_min_percentage and menu_elements_sorc_base.hp_usage_shield:get() < 1.0 then
         return false;
     end;
 
