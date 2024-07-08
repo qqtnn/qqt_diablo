@@ -35,6 +35,7 @@ game.buff = {}
 --- @field instance number
 --- @field type number
 --- @field name_hash number
+--- @field stacks number
 --- @field name fun(self:game.buff):string Get the name of the buff
 --- @field get_end_time fun(self:game.buff):number Get the end time of the buff
 
