@@ -115,3 +115,5 @@ utility.set_height_of_valid_position = function(point) end
 --- @param point vec3 The location to set the pin.
 --- @return boolean Returns true if the pin was set successfully, false otherwise.
 utility.set_map_pin = function(point) end
+
+utility.toggle_mount = function() end
