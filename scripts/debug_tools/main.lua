@@ -396,23 +396,10 @@ local function render_buff()
         return;
     end
 
-    local top_left_position = vec2.new(0, 30)
-
-    graphics.text_2d("Player Spell ID / Buffs Tracker", top_left_position, 13, color_blue(255))
-
-    for i, buff in ipairs(buffs) do
-        local buff_name = buff:name()
-        local buff_stacks = 0
-        local buff_id = tostring(buff.name_hash)
-        local buff_text = buff_id .. " : " .. buff_name .. " | " .. buff_stacks
-        local buff_position = top_left_position
-        buff_position.y = buff_position.y + 15
-        graphics.text_2d(buff_text, buff_position, 13, color_white(255))
-    end
-
     -- enemy portion
     local enemies_list = actors_manager.get_enemy_npcs();
-    local obj_top_left_position = vec2.new(400, 30)
+    local obj_top_left_position = vec2.new(0, 33)
+    
     graphics.text_2d("Enemies Spell ID / Buffs Tracker", obj_top_left_position, 13, color_red(255))
 
     local cursor_position = get_cursor_position()
@@ -429,13 +416,30 @@ local function render_buff()
             local obj_buff_name = obj_buff:name()
             local obj_buff_id = tostring(obj_buff.name_hash)
             local obj_buff_text = obj_buff_id .. " : " .. obj_buff_name
-            local obj_buff_position = obj_top_left_position
-            obj_buff_position.y = obj_buff_position.y + 15
-            graphics.text_2d(obj_buff_text, obj_buff_position, 13, color_white(255))
+            obj_top_left_position.y = obj_top_left_position.y + 15
+            graphics.text_2d(obj_buff_text, obj_top_left_position, 13, color_white(255))
         end
         
         break;
     end
+
+    local top_left_position = obj_top_left_position
+    top_left_position.y = top_left_position.y + 20
+    graphics.text_2d("Player Spell ID / Buffs Tracker", top_left_position, 13, color_blue(255))
+
+    for i, buff in ipairs(buffs) do
+        local buff_name = buff:name()
+        local buff_end_time = buff:get_end_time()
+        local buff_remaining = buff:get_remaining_time()
+        local buff_stacks = buff.stacks
+        local buff_end_tick = buff.stacks
+        local buff_id = tostring(buff.name_hash)
+        local buff_text = buff_id .. " : " .. buff_name .. " | stacks: " .. buff_stacks .. " | end_tick: " .. string.format("%.1f", buff_end_tick) .. " | end_time: " .. string.format("%.1f", buff_end_time) .. " | remaining: " .. string.format("%.1f", buff_remaining) 
+        top_left_position.y = top_left_position.y + 15
+        graphics.text_2d(buff_text, top_left_position, 13, color_white(255))
+    end
+
+    
 
 end
 
