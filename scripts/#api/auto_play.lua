@@ -2,13 +2,14 @@
 
 --- @class objective
 objective = {
-    unknown = 1,
-    revive = 2,
-    fight = 3,
-    quest = 4,
-    travel = 5,
-    loot = 6,
-    sell = 7,
+    unknown = 0,
+    revive = 1,
+    fight = 2,
+    quest = 3,
+    travel = 4,
+    loot = 5,
+    sell = 6,
+    repair = 7,
     reset = 8
 }
 
@@ -54,3 +55,9 @@ auto_play.set_dungeon_waypoints = function(waypoints_table) end
 --- Gets the current objective.
 --- @return objective The current objective.
 auto_play.get_objective = function() end
+
+-- developer functions
+auto_play.sell_routine = function() end
+auto_play.salvage_routine = function() end
+auto_play.repair_routine = function() end
+auto_play.loot_items_around = function() end
