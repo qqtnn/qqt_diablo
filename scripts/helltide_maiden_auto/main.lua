@@ -175,6 +175,10 @@ local function reset_helltide_maiden()
     insert_only_with_npcs_playercount = 0
 end
 
+local last_reset_time = 0
+local RESET_INTERVAL = 30000 -- 30 seconds in milliseconds
+
+
 on_update(function ()
     local active_spell_id = local_player:get_active_spell_id()
     if active_spell_id > 0 then
@@ -182,10 +186,13 @@ on_update(function ()
     end
 
     if get_time_ms() - last_active_spell_time >= 10000 and helltide_maiden_arrivalstate > 0 then
-        -- run auto reset once 10 seconds idle idk
-        reset_helltide_maiden()
+        if get_time_ms() - last_reset_time >= RESET_INTERVAL then
+            reset_helltide_maiden()
+            last_reset_time = get_time_ms()
+        end
     end
 end)
+
 
 -- helper function to print while in debug mode
 local function local_console_print(message)
@@ -247,19 +254,24 @@ local function get_positions_in_radius(center_point, radius)
     return positions
 end
 
+local item_attempt_counter = {}
+local item_blacklist = {}
+local MAX_ATTEMPTS = 200
+
+
 -- Function to run the loot logic
 function run_loot_logic()
     if not can_run_loot_logic() then
-        console.print("aborting runing loot logic")
+        -- console.print("aborting runing loot logic")
         return
     end
 
     if not menu.enable_loot_logic:get() then
-        console.print("aborting runing loot logic - menu")
+        -- console.print("aborting runing loot logic - menu")
         return
     end
 
-    console.print("runing loot logic")
+    -- console.print("runing loot logic")
 
     -- Fetch all items
     local items = actors_manager.get_all_items()
@@ -271,14 +283,87 @@ function run_loot_logic()
 
     -- Pick up items based on configuration
     for _, item in ipairs(items) do
-        if items then
-            if not menu.only_loot_ga:get() or string.find(item:get_skin_name(), "GA") then
-                loot_manager.loot_item(item, true, true)
+        local item_id = item:get_id()
+        
+        -- Skip blacklisted items
+        if item_blacklist[item_id] then
+            -- console.print("Item " .. item_id .. " is blacklisted")
+            goto continue
+        end
+
+        -- Initialize attempt counter for this item if not already set
+        if not item_attempt_counter[item_id] then
+            item_attempt_counter[item_id] = 0
+        end
+
+        -- Check if the item meets the criteria
+        if not menu.only_loot_ga:get() or string.find(item:get_skin_name(), "GA") then
+            local success = loot_manager.loot_item(item, true, true)
+            if success then
+                -- Reset attempt counter on success
+                item_attempt_counter[item_id] = 0
                 return
+            else
+                -- Increment attempt counter on failure
+                item_attempt_counter[item_id] = item_attempt_counter[item_id] + 1
+                if item_attempt_counter[item_id] >= MAX_ATTEMPTS then
+                    -- Blacklist item after MAX_ATTEMPTS
+                    item_blacklist[item_id] = true
+                    -- console.print("Blacklisting item " .. item_id)
+                end
             end
         end
         
+        ::continue::
     end
+end
+
+
+-- boolean
+function run_sell_logic()
+
+    if not menu.main_helltide_maiden_auto_plugin_enabled:get() then
+        -- do nothing when disabled
+        return false
+    end
+
+    if not menu.enable_sell_logic:get() then
+        return false
+    end
+
+    -- if get_time_ms() - last_active_spell_time < 2000 then
+    --     return false
+    -- end
+
+    local objective_id = auto_play.get_objective()
+    -- console.print("objective_id " .. objective_id)
+    if objective_id == objective.sell then
+        if menu.salvage_instead:get() then
+            auto_play.salvage_routine()
+            return true
+        else
+            auto_play.sell_routine()
+            return true
+        end
+    end
+
+    return false
+end
+
+function run_repair_logic()
+
+    if not menu.main_helltide_maiden_auto_plugin_enabled:get() then
+        -- do nothing when disabled
+        return false
+    end
+
+    local objective_id = auto_play.get_objective()
+    if objective_id == objective.repair then
+        auto_play.repair_routine()
+        return true
+    end
+
+    return false
 end
 
 -- helper function to teleport to next waypoint looping all hellpoint_tps
@@ -1206,6 +1291,11 @@ on_render_menu(function()
         if menu.enable_loot_logic:get() then
             menu.only_loot_ga:render("Only Loot GA Items", "Only loot items containing 'GA' in their name")
         end
+
+        menu.enable_sell_logic:render("Enable Sell Logic", "Enable or disable the sell logic feature")
+        if menu.enable_sell_logic:get() then
+            menu.salvage_instead:render("Salvage Instead", "Salvage items instead of selling them")
+        end
         
         -- checkbox to reset any time after arriving at helltide maiden or being in weired states / perma-stuck
         menu.main_helltide_maiden_auto_plugin_reset:render("Reset (dont keep on)", "Temporary enable reset mode to reset plugin")
@@ -1229,6 +1319,20 @@ on_render_menu(function()
 -- use for core logic
 on_update(function()
 
+        -- failsafe to not run script early or during loading screens
+        local local_player = get_local_player()
+        if not local_player then
+            return
+        end
+
+        if run_sell_logic() then
+            return;
+        end
+
+        if run_repair_logic() then
+            return;
+        end
+
         -- tick rate logic
         local current_time = os.clock()
         if current_time - last_update_time < update_interval then
@@ -1236,11 +1340,7 @@ on_update(function()
         end
         last_update_time = current_time
 
-        -- failsafe to not run script early or during loading screens
-        local local_player = get_local_player()
-        if not local_player then
-            return
-        end
+ 
         -- get current player position vec3 x,y,z
         local player_position = local_player:get_position()
         if not player_position then

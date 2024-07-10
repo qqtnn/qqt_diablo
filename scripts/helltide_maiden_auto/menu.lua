@@ -26,6 +26,9 @@ local menu_elements =
     enable_loot_logic = checkbox:new(true, get_hash(plugin_label .. "enable_loot_logic")),
     only_loot_ga = checkbox:new(false, get_hash(plugin_label .. "only_loot_ga")),
 
+    enable_sell_logic = checkbox:new(true, get_hash(plugin_label .. "enable_sell_logic")),
+    salvage_instead = checkbox:new(false, get_hash(plugin_label .. "salvage_instead")),
+
     main_tree = tree_node:new(0),
 }
 return menu_elements
