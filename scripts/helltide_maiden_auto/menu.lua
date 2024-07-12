@@ -10,13 +10,12 @@ local menu_elements =
     main_helltide_maiden_auto_plugin_explorer_threshold = slider_float:new(0.0, 20.0, 1.5, get_hash("main_helltide_maiden_auto_plugin_explorer_threshold")),
     main_helltide_maiden_auto_plugin_explorer_thresholdvar = slider_float:new(0.0, 10.0, 3.0, get_hash("main_helltide_maiden_auto_plugin_explorer_thresholdvar")),
     main_helltide_maiden_auto_plugin_explorer_circle_radius = slider_float:new(5.0, 30.0, 15.0, get_hash("main_helltide_maiden_auto_plugin_explorer_circle_radius")),
-    main_helltide_maiden_auto_plugin_teleport_interval_slider = slider_float:new(5.0, 60.0, 20.0, get_hash("main_helltide_maiden_auto_plugin_teleport_interval_slider")),
     main_helltide_maiden_auto_plugin_insert_hearts = checkbox:new(true, get_hash(plugin_label .. "main_helltide_maiden_auto_plugin_insert_hearts")),
     main_helltide_maiden_auto_plugin_insert_hearts_interval_slider = slider_float:new(0.0, 600.0, 300.0, get_hash("main_helltide_maiden_auto_plugin_insert_hearts_interval_slider")),
     main_helltide_maiden_auto_plugin_insert_hearts_afterboss = checkbox:new(false, get_hash(plugin_label .. "main_helltide_maiden_auto_plugin_insert_hearts_afterboss")),
     main_helltide_maiden_auto_plugin_insert_hearts_onlywithnpcs = checkbox:new(true, get_hash(plugin_label .. "main_helltide_maiden_auto_plugin_insert_hearts_onlywithnpcs")),
     main_helltide_maiden_auto_plugin_insert_hearts_afternoenemies = checkbox:new(true, get_hash(plugin_label .. "main_helltide_maiden_auto_plugin_insert_hearts_afternoenemies")),
-    main_helltide_maiden_auto_plugin_insert_hearts_afternoenemies_interval_slider = slider_float:new(0.0, 600.0, 60.0, get_hash("main_helltide_maiden_auto_plugin_insert_hearts_afternoenemies_interval_slider")),
+    main_helltide_maiden_auto_plugin_insert_hearts_afternoenemies_interval_slider = slider_float:new(2.0, 600.0, 10.0, get_hash("main_helltide_maiden_auto_plugin_insert_hearts_afternoenemies_interval_slider")),
     main_helltide_maiden_auto_plugin_reset = checkbox:new(false, get_hash(plugin_label .. "main_helltide_maiden_auto_plugin_reset")),
     main_helltide_maiden_auto_plugin_fake_maiden = checkbox:new(false, get_hash(plugin_label .. "main_helltide_maiden_auto_plugin_fake_maiden")),
     main_helltide_maiden_auto_plugin_fake_circle = checkbox:new(false, get_hash(plugin_label .. "main_helltide_maiden_auto_plugin_fake_circle")),
@@ -28,6 +27,8 @@ local menu_elements =
 
     enable_sell_logic = checkbox:new(true, get_hash(plugin_label .. "enable_sell_logic")),
     salvage_instead = checkbox:new(false, get_hash(plugin_label .. "salvage_instead")),
+
+    enable_repair_logic = checkbox:new(true, get_hash(plugin_label .. "enable_repair_logic")),
 
     main_tree = tree_node:new(0),
 }
