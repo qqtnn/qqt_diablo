@@ -1,4 +1,5 @@
 ---@diagnostic disable: lowercase-global, missing-return, undefined-global
+
 --- Get the position of the local player.
 --- @return vec3 @Player's position
 function get_player_position() end

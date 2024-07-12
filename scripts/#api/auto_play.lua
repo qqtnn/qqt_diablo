@@ -61,3 +61,5 @@ auto_play.sell_routine = function() end
 auto_play.salvage_routine = function() end
 auto_play.repair_routine = function() end
 auto_play.loot_items_around = function() end
+
+auto_play.set_tmp_override = function(time) end
