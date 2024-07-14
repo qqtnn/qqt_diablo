@@ -92,8 +92,8 @@ local insert_only_with_npcs_playercount = 0
 local function reset_helltide_maiden()
     player_in_helltide_zone = 0
     helltide_zone_pin = 0
-    helltide_tps_iter = 1
-    helltide_tps_next_zone_name = ""
+    -- helltide_tps_iter = 1
+    -- helltide_tps_next_zone_name = ""
     helltide_zone_name = "Unknown"
     helltide_maiden_auto_task = helltide_maiden_auto_tasks.FIND_ZONE
     helltide_maiden_arrivalstate = 0
@@ -1321,8 +1321,9 @@ on_update(function()
     end
 
     if get_time_ms() - last_active_spell_time >= 10000 and helltide_maiden_arrivalstate > 0 
-    and not is_in_helltides then
+    and found_player_in_helltide_zone == 0 then
        if get_time_ms() - last_reset_time >= 200000 then -- 200 seconds
+           console.print("[HELLTIDE-MAIDEN-AUTO] on_update() - Resetting Helltide")
            reset_helltide_maiden()
            last_reset_time = get_time_ms()
        end
@@ -1442,7 +1443,7 @@ on_update(function()
                 player_in_helltide_zone = 1
             else
                 -- buff/unmount arrival timing issue
-                if helltide_maiden_arrivalstate == 1 then
+                if helltide_maiden_arrivalstate == 1 and found_player_in_helltide_zone == 1 then
                     player_in_helltide_zone = 1
                 else
                     player_in_helltide_zone = 0
@@ -1540,7 +1541,8 @@ on_update(function()
                 end
                 pathfinder_nextpos = utility.set_height_of_valid_position(pathfinder_nextpos)
                 pathfinder_prevpos = pathfinder_nextpos
-                pathfinder.force_move(pathfinder_nextpos) -- faster with horse than request_move() else it would look bad
+                -- pathfinder.force_move(pathfinder_nextpos) -- faster with horse than request_move() else it would look bad
+                pathfinder.force_move_raw(pathfinder_nextpos)
             else
                 -- run if being stuck
                 console.print("[HELLTIDE-MAIDEN-AUTO] on_update() - WARNING - Pathfinder STUCK detected finding next best walkable position based on current player position")
@@ -1552,7 +1554,8 @@ on_update(function()
                 if utility.is_point_walkeable_heavy(walkeable_pos) then
                     console.print("[HELLTIDE-MAIDEN-AUTO] on_update() - Found get_positions_in_radius() around current player_position, walking to alternative waypoint")
                     pathfinder.clear_stored_path()
-                    pathfinder.force_move(walkeable_pos)
+                    -- pathfinder.force_move(walkeable_pos)
+                    pathfinder.force_move_raw(walkeable_pos)
                 end
             end
 
@@ -1667,7 +1670,8 @@ on_update(function()
                         -- insert logic part 1
                         -- enable the waiter and walk to center of maidenpos
                         pathfinder.clear_stored_path()
-                        pathfinder.force_move(helltide_final_maidenpos)
+                        -- pathfinder.force_move(helltide_final_maidenpos)
+                        pathfinder.force_move_raw(helltide_final_maidenpos)
                         insert_hearts_waiter = 1
                         helltide_maiden_auto_task = helltide_maiden_auto_tasks.INSERT
                         last_insert_hearts_waiter_time = current_time
@@ -1797,7 +1801,8 @@ on_update(function()
 
                             -- use the point if its not too close to previous point
                             explorer_point = close_enemy_pos
-                            pathfinder.request_move(explorer_point)
+                            -- pathfinder.request_move(explorer_point)
+                            pathfinder.force_move_raw(explorer_point)
 
                             -- wait going to next waypoint until we reached previous
                             explorer_go_next = 0
@@ -1809,7 +1814,8 @@ on_update(function()
                             explorer_go_next = 1
                         else
                             -- keep moving
-                            pathfinder.request_move(explorer_point)
+                            -- pathfinder.request_move(explorer_point)
+                            pathfinder.force_move_raw(explorer_point)
                         end
                     end
                 end
@@ -1821,8 +1827,9 @@ on_update(function()
         end
     else
         -- Player is NOT in helltide zone
-        -- console.print("[HELLTIDE-MAIDEN-AUTO] on_update() - Player NOT IN helltide zone")
-
+        console.print("[HELLTIDE-MAIDEN-AUTO] on_update() - Player NOT IN helltide zone")
+        helltide_maiden_arrivalstate = 0
+        reset_helltide_maiden()
         -- teleport to next location
         tp_to_next()
     end
