@@ -140,3 +140,18 @@ function get_local_player_name() end
 --- Get the current world object.
 --- @return game.world|nil @Current world object or nil if not available
 function get_current_world() end
+
+--- @return number
+function get_helltide_coin_cinders() end
+
+--- @return number
+function get_helltide_coin_hearts() end
+
+--- @return boolean
+function is_chat_open() end
+
+--- @return boolean
+function is_in_helltide() end
+
+--- @return string
+function get_local_player_name() end
