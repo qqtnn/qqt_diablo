@@ -74,6 +74,14 @@ local function is_action_allowed()
 
 end
 
+-- local function is_spell_owned(spell_id)
+
+--     for i, x in ipairs(get_equipped_spell_ids()) do
+--         if x == spell_id then
+--             return true
+--         end
+--     end
+-- end
 local function is_spell_allowed(spell_enable_check, next_cast_allowed_time, spell_id)
     if not spell_enable_check then
         return false;

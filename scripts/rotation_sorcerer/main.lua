@@ -169,7 +169,7 @@ on_update(function ()
                     return;
                 end
             end
-            return;
+            -- return;
         end;
         -- check if player has flame shield buff, if not, cast flameshield if orb mode does not equal none
         -- local has_flame_shield = false
