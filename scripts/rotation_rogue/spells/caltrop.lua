@@ -4,7 +4,8 @@ local menu_elements_caltrop =
 {
     tree_tab            = tree_node:new(1),
     main_boolean        = checkbox:new(true, get_hash(my_utility.plugin_label .. "caltrop_base_main_bool")),
-    spell_range   = slider_float:new(1.0, 15.0, 2.60, get_hash(my_utility.plugin_label .. "caltrop_spell_range_2")),
+    usage_filter        = combo_box:new(0, get_hash(my_utility.plugin_label .. "caltrop_usage_filter")),
+    spell_range         = slider_float:new(1.0, 15.0, 2.60, get_hash(my_utility.plugin_label .. "caltrop_spell_range_2")),
 
 }
 
@@ -12,6 +13,8 @@ local function menu()
     
     if menu_elements_caltrop.tree_tab:push("Caltrop")then
         menu_elements_caltrop.main_boolean:render("Enable Spell", "")
+        local boss_options = {"Always for Vulnerability", "Elites and Bosses", "Only Bosses"}
+        local boss_selection = menu_elements_caltrop.usage_filter:render("Usage", boss_options, "How to use caltrops")
         menu_elements_caltrop.spell_range:render("Spell Range", "", 1)
  
         menu_elements_caltrop.tree_tab:pop()
@@ -58,9 +61,10 @@ local function logics(entity_list, target_selector_data, target)
         end
         return false
     end
-
-    if target:is_vulnerable() then
-        return false
+    if menu_elements_caltrop.usage_filter:get() == 0 then
+        if target:is_vulnerable() then
+            return false
+        end
     end
 
     local max_health = target:get_max_health()
@@ -82,16 +86,17 @@ local function logics(entity_list, target_selector_data, target)
         end
         return false
     end
-
+    if (menu_elements_caltrop.usage_filter:get() == 1 and target:is_elite() or target:is_boss())
+     or (menu_elements_caltrop.usage_filter:get() == 2 and target:is_boss())
+    then
     if cast_spell.target(target, caltrop_spell_data, true) then
-
         local current_time = get_time_since_inject();
         next_time_allowed_cast = current_time + 6.0;
-
         console.print("Casted Caltrop");
         return true;
-    end;
-            
+        end;
+    end
+
     return false;
 end
 
