@@ -15,18 +15,32 @@ local function menu()
     end
 end
 
-local spell_id_bold_imb = 359246
+local spell_id_cold_imb = 359246
 local next_time_allowed_cast = 0.0
 
-local function logics(target)
+local function is_active()
+    local local_player = get_local_player()
+    local buffs = local_player:get_buffs()
+   
+    for i, buff in ipairs(buffs) do
+        if buff.name_hash == 359246 then
+            -- console.print("Cold Imbuement Active")
+            return true
+        end
+    end
+
+    return false
+end
+
+local function will_cast(target)
     local menu_boolean = cold_imb_menu_elements_base.main_boolean:get()
     local is_logic_allowed = my_utility.is_spell_allowed(
-        menu_boolean, 
-        next_time_allowed_cast, 
-        spell_id_bold_imb
+        menu_boolean,
+        next_time_allowed_cast,
+        spell_id_cold_imb
     )
 
-    if not is_logic_allowed then
+    if not is_logic_allowed or is_active() then
         return false
     end
 
@@ -38,20 +52,26 @@ local function logics(target)
             local is_special = enemy:is_champion() or enemy:is_elite() or enemy:is_boss()
             if is_special then
                 special_found = true
+                break
             end
         end
 
         if not special_found then
-            console.print("We didn't get any special boys")
             return false
         end
     end
 
-    if cast_spell.self(spell_id_bold_imb, 0.0) then
+    return true
+end
+
+local function logics(target)
+    if will_cast(target) then
         local current_time = get_time_since_inject()
-        next_time_allowed_cast = current_time + 0.2
-        console.print("Rouge Plugin, Casted Cold Imb")
-        return true
+        if cast_spell.self(spell_id_cold_imb, 0.0) then
+            next_time_allowed_cast = current_time + 0.2
+            console.print("Rouge Plugin, Casted Cold Imb")
+            return true
+        end
     end
 
     return false
@@ -60,4 +80,6 @@ end
 return {
     menu = menu,
     logics = logics,
+    is_active = is_active,
+    will_cast = will_cast,
 }
