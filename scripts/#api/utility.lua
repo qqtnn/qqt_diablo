@@ -118,4 +118,17 @@ utility.set_map_pin = function(point) end
 
 utility.toggle_mount = function() end
 
+-- Pit Levels
+-- 51 = 0x1C3554
+-- 75 = 0x1C3586
+-- 100 = 0x1C35C1
+-- 61 = 0x1C3568
+-- 121 = 0x1D6D21
+-- 81 = 0x1C3595 
+-- 98 = 0x1C35BC
+-- 31 = 0x1C352B
+-- 119 = 0x1D6D1D
+-- 129 = 0x1D6D36
+-- 141 = 0x1D6D4E
+-- 101 = 0x1D6CEF
 utility.open_pit_portal = function(level) end
