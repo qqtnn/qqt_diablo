@@ -51,14 +51,6 @@ function pathfinder.clear_stored_path() end
 --- @param pos vec3
 --- @return vec3[]
 function pathfinder.create_path_game_engine(pos) end
-
---- Gets the next waypoint from the waypoint list based on current position and threshold.
---- @param pos vec3
---- @param waypoint_list vec3[]
---- @param threshold number
---- @return vec3
-function pathfinder.get_next_waypoint(pos, waypoint_list, threshold) end
-
 --- Forces a move to a specified position.
 --- @param pos vec3
 --- @return boolean
@@ -73,3 +65,22 @@ function pathfinder.force_move_raw(pos) end
 --- @param pos vec3
 --- @return nil
 function pathfinder.request_move(pos) end
+
+--- Gets the next waypoint from the waypoint list based on current position and threshold.
+--- @param pos vec3
+--- @param waypoint_list vec3[]
+--- @param threshold number
+--- @return vec3
+function pathfinder.get_next_waypoint(pos, waypoint_list, threshold) end
+-- note: changed on july 20, 2024
+
+--- @param point vec3
+--- @param waypoint_list vec3[]
+--- list of waypoints for example those you get from get_engine_waypoints
+--- and then 2nd parameter for example player_position
+function pathfinder.sort_waypoints(waypoint_list, point) end
+
+--- @param value integer
+-- this is the index used by pathfinder.get_next_waypoint as reference
+-- useful to reset to 1, can be used for other things aswell
+function pathfinder.set_last_waypoint_index(value) end

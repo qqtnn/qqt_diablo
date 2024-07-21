@@ -127,3 +127,12 @@ function loot_manager.sell_specific_item(item) end
 --- @param item game.item_data
 --- @return boolean
 function loot_manager.salvage_specific_item(item) end
+
+--- Interacts with the given vendor and repairs all items.
+--- @param obj game.object
+--- @return boolean
+function loot_manager.interact_with_vendor_and_repair_all(obj) end
+
+--- Repair all items. Requires vendor to be open.
+--- @return boolean
+function loot_manager.repair_all_items() end
