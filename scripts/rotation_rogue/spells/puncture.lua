@@ -5,17 +5,22 @@ local menu_elements_puncture_base =
     tree_tab            = tree_node:new(1),
     main_boolean        = checkbox:new(true, get_hash(my_utility.plugin_label .. "puncture_main_boolean_base")),
     use_as_filler_only  = checkbox:new(true, get_hash(my_utility.plugin_label .. "_wind_shear_use_as_filler_only_base")),
+    activate_filter     = checkbox:new(true, get_hash(my_utility.plugin_label .. "_activate_filter_base")),
+    close_distance      = checkbox:new(false, get_hash(my_utility.plugin_label .. "_close_distance_base")),
+    range_slider        = slider_int:new(1, 10, 7, get_hash(my_utility.plugin_label .. "_puncture_range_slider")),
 }
 
 local function menu()
-    
-    if menu_elements_puncture_base.tree_tab:push("Puncture")then
+    if menu_elements_puncture_base.tree_tab:push("Puncture") then
         menu_elements_puncture_base.main_boolean:render("Enable Spell", "")
-
         if menu_elements_puncture_base.main_boolean:get() then
+            menu_elements_puncture_base.activate_filter:render("Activate Distance Check", "Enable distance check")
+            if menu_elements_puncture_base.activate_filter:get() then
+                menu_elements_puncture_base.close_distance:render("Close Distance to Target", "Move closer if out of range")
+                menu_elements_puncture_base.range_slider:render("Spell Range", "Set the range for Puncture")
+            end
             menu_elements_puncture_base.use_as_filler_only:render("Filler Only", "Prevent casting with a lot of energy")
-         end
- 
+        end
         menu_elements_puncture_base.tree_tab:pop()
     end
 end
@@ -27,19 +32,19 @@ local spell_data_puncture = spell_data:new(
     2.0,                        -- range
     0.8,                        -- cast_delay
     0.3,                        -- projectile_speed
-    true,                      -- has_collision
-    spell_id_puncture,           -- spell_id
+    true,                       -- has_collision
+    spell_id_puncture,          -- spell_id
     spell_geometry.rectangular, -- geometry_type
-    targeting_type.skillshot    --targeting_type
+    targeting_type.skillshot    -- targeting_type
 )
 local next_time_allowed_cast = 0.0;
+
 local function logics(target)
-    
     local local_player = get_local_player()
     if not local_player then
         return false
     end
-    
+
     local menu_boolean = menu_elements_puncture_base.main_boolean:get();
     local is_logic_allowed = my_utility.is_spell_allowed(
                 menu_boolean, 
@@ -50,14 +55,24 @@ local function logics(target)
         return false;
     end;
 
-    local spell_range = 7.0
+    local spell_range = menu_elements_puncture_base.range_slider:get()
     local player_position = get_player_position();
     local target_position = target:get_position();
     local distance_sqr = target_position:squared_dist_to_ignore_z(player_position)
-    if distance_sqr > (spell_range * spell_range ) then
-        return false
-    end
 
+    local is_filter_enabled = menu_elements_puncture_base.activate_filter:get();  
+    if is_filter_enabled then
+        if distance_sqr > (spell_range * spell_range) then
+            if menu_elements_puncture_base.close_distance:get() then
+                pathfinder.request_move(target_position)
+                console.print("Moving closer to target")
+                return true
+            else
+                console.print("Skip")
+                return false
+            end
+        end
+    end
 
     local is_filler_enabled = menu_elements_puncture_base.use_as_filler_only:get();  
     if is_filler_enabled then
@@ -70,20 +85,17 @@ local function logics(target)
             return false;
         end
     end;
-    
 
     if cast_spell.target(target, spell_data_puncture, false) then
-
         local current_time = get_time_since_inject();
         next_time_allowed_cast = current_time + 0.1;
 
-        console.print("Rouge, Casted Puncture");
+        console.print("Rogue, Casted Puncture");
         return true;
     end;
-            
+
     return false;
 end
-
 
 return 
 {
