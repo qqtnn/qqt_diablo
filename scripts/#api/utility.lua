@@ -132,3 +132,7 @@ utility.toggle_mount = function() end
 -- 141 = 0x1D6D4E
 -- 101 = 0x1D6CEF
 utility.open_pit_portal = function(level) end
+
+utility.summon_boss = function() end
+utility.summon_boss_next_recipe = function() end
+utility.summon_boss_previous_recipe = function() end
