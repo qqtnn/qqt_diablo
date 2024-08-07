@@ -35,7 +35,7 @@ local function get_target_selector_data(source, list)
     local possible_targets_list = list;
     if #possible_targets_list == 0 then
         return
-        { 
+        {
             is_valid = is_valid;
         }
     end;
@@ -228,7 +228,7 @@ local function get_target_selector_data(source, list)
         end
     end
 
-    return 
+    return
     {
         is_valid = is_valid,
 
@@ -272,7 +272,7 @@ local function get_target_list(source, range, collision_table, floor_table, angl
 
     local new_list = {}
     local possible_targets_list = target_selector.get_near_target_list(source, range);
-    
+
     for _, unit in ipairs(possible_targets_list) do
 
         if collision_table.is_enabled then
@@ -287,7 +287,7 @@ local function get_target_list(source, range, collision_table, floor_table, angl
         if floor_table.is_enabled then
             local z_difference = math.abs(source.z() - unit_position:z())
             local is_other_floor = z_difference > floor_table.height
-        
+
             if is_other_floor then
                 goto continue
             end
@@ -297,7 +297,7 @@ local function get_target_list(source, range, collision_table, floor_table, angl
             local cursor_position = get_cursor_position();
             local angle = unit_position:get_angle(cursor_position, source);
             local is_outside_angle = angle > floor_table.max_angle
-        
+
             if is_outside_angle then
                 goto continue
             end
@@ -376,7 +376,7 @@ local function is_valid_area_spell_static(area_table, min_hits)
     if not area_table.is_valid then
         return false;
     end
-    
+
     return area_table.hits_amount >= min_hits;
 end
 
@@ -398,7 +398,7 @@ local function is_valid_area_spell_smart(area_table, min_hits)
             return true;
         end
     end
-    
+
     return false;
 end
 
@@ -406,29 +406,34 @@ local function is_valid_area_spell_percentage(area_table, entity_list, min_perce
     if not area_table.is_valid then
         return false;
     end
-    
+
     local entity_list_size = #entity_list;
     local hits_amount = area_table.hits_amount;
     local percentage = hits_amount / entity_list_size;
     if percentage >= min_percentage then
         return true;
-    end    
+    end
 end
 
 
 local function is_valid_area_spell_aio(area_table, min_hits, entity_list, min_percentage)
     if not area_table.is_valid then
+
+        console.print("111")
         return false;
     end
-  
+
     if is_valid_area_spell_smart(area_table, min_hits) then
+        console.print("222")
         return true;
     end
 
     if is_valid_area_spell_percentage(area_table, entity_list, min_percentage) then
+        console.print("333")
         return true;
     end
-    
+
+    console.print("444")
     return false;
 end
 

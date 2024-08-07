@@ -79,13 +79,20 @@ local function logics(target, entity_list)
 
     local rectangle_width = 2.0;
     local rectangle_lenght = 10
-    local area_data = target_selector.get_most_hits_target_rectangle_area_heavy(player_pos, rectangle_lenght, rectangle_width)
+    -- return table:
+-- hits_amount(int)
+-- score(float)
+-- main_target(gameobject)
+-- victim_list(table game_object)
+    local area_data = my_target_selector.get_most_hits_rectangle(player_pos, rectangle_lenght, rectangle_width)
     local best_target = area_data.main_target;
 
     if not best_target then
         return;
     end
 
+
+    console.print("best_target found " .. best_target:get_skin_name())
     local best_target_position = best_target:get_position();
     local best_cast_data = my_utility.get_best_point_rec(best_target_position, 1, 1, area_data.victim_list);
 
@@ -125,19 +132,23 @@ local function logics(target, entity_list)
     local is_area_valid = my_target_selector.is_valid_area_spell_aio(area_data, min_hits_menu, entity_list, min_percentage);
 
     if not is_area_valid  then
+        console.print("is_area_valid")
         return false;
     end
 
     if not area_data.main_target:is_enemy() then
+        console.print("not enemy")
         return false;
     end
 
-    if not is_single_target_allowed and area_data.score < menu_elements_spear_base.soft_score:get() then
+    if not is_single_target_allowed and area_data.score < menu_elements_spear_base.soft_score:get() and menu_elements_spear_base.min_hits_slider:get() > 1 then
+        console.print("not is_single_target_allowed")
         return false;
     end
 
     local best_cast_position = best_cast_data.point;
     if prediction.is_wall_collision(player_pos, best_cast_position, 0.66) then
+        console.print("is_wall_collision")
         return false
     end
 

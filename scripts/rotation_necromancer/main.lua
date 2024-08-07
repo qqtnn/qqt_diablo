@@ -235,7 +235,7 @@ on_update(function ()
         return;
     end
 
-    if spells.bone_spear.logics(best_target)then
+    if spells.bone_spear.logics(best_target, entity_list)then
         cast_end_time = current_time + 0.4;
         return;
     end;
