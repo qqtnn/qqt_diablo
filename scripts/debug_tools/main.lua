@@ -21,6 +21,8 @@ local menu_elements = {
     future_position_time_slider = slider_float:new(0.1, 2.0, 0.5, get_hash("debug_module_unique_id_gameobjects_debug_future_position_time_slider")),
     future_position_radius_slider = slider_float:new(0.2, 2.0, 0.5, get_hash("debug_module_unique_id_gameobjects_debug_future_position_radius_slider")),
 
+    show_distance = checkbox:new(false, get_hash("debug_module_unique_id_gameobjects_debug_show_distance_checkbox")),
+
     -- Local Player Debug
     local_player_debug_tree = tree_node:new(1),
     draw_map_info_checkbox = checkbox:new(false, get_hash("debug_module_unique_id_localplayer_debug_draw_map_info_checkbox")),
@@ -95,6 +97,8 @@ local function render_menu()
                     menu_elements.future_position_time_slider:render("Time", "Set the time ahead for future position", 2)
                     menu_elements.future_position_radius_slider:render("Radius", "Set the radius for the future position circle", 2)
                 end
+
+                menu_elements.show_distance:render("Show Distance", "Toggle drawing distance to objects")
 
                 if menu_elements.gameobjects_settings_tree:push("Name Filter") then
                     menu_elements.name_filter_input:render("Filter Text", "Enter text to filter objects by name", true, "Go to Input", "Name Text Filter")
@@ -229,6 +233,22 @@ local function draw_object_future_position(obj, player_position, max_distance)
     end
 end
 
+local function draw_object_distance(obj, player_position, max_distance)
+    local show_distance = menu_elements.show_distance:get()
+    if not show_distance then
+        return
+    end
+
+    local object_position = obj:get_position()
+    local distance_to_object = player_position:dist_to(object_position)
+    local distance_text = string.format("%.2f", distance_to_object)
+    local object_position_2d = graphics.w2s(object_position)
+
+    if object_position_2d then
+        graphics.text_2d(distance_text, object_position_2d, 12, color_white(255))
+    end
+end
+
 -- Function to get a list of game objects based on type and affiliation
 local function get_gameobjects_list(type, affiliation)
     local toggle_key = menu_elements.list_toggle:get_key();
@@ -360,6 +380,12 @@ local function draw_object_information(obj, position_2d, player_position, max_di
         position_2d.y = position_2d.y + 15
     end
 
+    -- Drawing Distance
+    if menu_elements.show_distance:get() then
+        draw_object_distance(obj, player_position, max_distance)
+        position_2d.y = position_2d.y + 15
+    end
+
      -- Drawing Interactable State
      if menu_elements.draw_interactable_checkbox:get() then
         local is_interactable = not obj:can_not_interact();
@@ -468,7 +494,11 @@ local function render_visuals()
             local object_position = obj:get_position()
             local distance_to_object_sqr = object_position:squared_dist_to_ignore_z(player_position)
 
-            if distance_to_object_sqr <= (max_distance * max_distance) and not obj:can_not_interact() and (name_filter_text == "" or string.find(object_name, name_filter_text)) then
+            if distance_to_object_sqr 
+            <= (max_distance * max_distance) 
+            --and not obj:can_not_interact() 
+            and (name_filter_text == "" 
+            or string.find(object_name, name_filter_text)) then
                 local object_position_2d = graphics.w2s(object_position)
                 if not object_position_2d then goto continue end
                 local info_position = vec2:new(object_position_2d.x, object_position_2d.y)
