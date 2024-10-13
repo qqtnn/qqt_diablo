@@ -13,6 +13,7 @@ local menu = require("menu");
 
 local spells =
 {
+    dance_of_knives        = require("spells/dance_of_knives"),
     concealment             = require("spells/concealment"),
     caltrop                 = require("spells/caltrop"),
     puncture                = require("spells/puncture"),
@@ -56,6 +57,7 @@ on_render_menu (function ()
 
     menu.dash_cooldown:render("Dash Cooldown", "");
 
+    spells.dance_of_knives.menu();
     spells.concealment.menu();
     spells.caltrop.menu();
     spells.puncture.menu();
