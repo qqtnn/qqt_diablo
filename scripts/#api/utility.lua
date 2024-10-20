@@ -136,3 +136,5 @@ utility.open_pit_portal = function(level) end
 utility.summon_boss = function() end
 utility.summon_boss_next_recipe = function() end
 utility.summon_boss_previous_recipe = function() end
+
+utility.confirm_sigil_notification = function() end

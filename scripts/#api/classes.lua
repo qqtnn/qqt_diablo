@@ -35,9 +35,15 @@ game.buff = {}
 --- @field instance number
 --- @field type number
 --- @field name_hash number
+--- @field start_tick number
+--- @field duration number
+--- @field flags number
 --- @field stacks number
 --- @field name fun(self:game.buff):string Get the name of the buff
 --- @field get_end_time fun(self:game.buff):number Get the end time of the buff
+--- @field get_remaining_time fun(self:game.buff):number 
+--- @field get_duration fun(self:game.buff):number
+--- @field is_active_buff fun(self:game.buff):number Active Buff has expire time, non active buff means its undefined time
 
 ---@class game.object
 game.object = {}
@@ -89,7 +95,6 @@ function game.object:get_buffs() end
 --- @field is_vulnerable fun(self:game.object):boolean
 --- @field is_untargetable fun(self:game.object):boolean
 --- @field is_item fun(self:game.object):boolean
---- @field can_not_interact fun(self:game.object):boolean
 --- @field get_base_health fun(self:game.object):number
 --- @field get_bonus_health_modifier fun(self:game.object):number
 --- @field get_current_health fun(self:game.object):number
@@ -126,6 +131,8 @@ function game.object:get_buffs() end
 --- @field get_equipped_items fun(self:game.object):table
 --- @field get_inventory_items fun(self:game.object):table
 --- @field get_consumable_items fun(self:game.object):table
+--- @field get_dungeon_key_items fun(self:game.object):table
+--- @field get_socketable_items fun(self:game.object):table
 --- @field get_item_slot_index fun(self:game.object, item:game.item_data, bag_id:number):number
 --- @field get_item_info fun(self:game.object, item:game.item_data):game.item_data
 --- @field get_gold fun(self:game.object):number
@@ -134,4 +141,6 @@ function game.object:get_buffs() end
 --- @field get_spell_charges fun(self:game.object, spell_id:number):number
 --- @field get_class_specialization_id fun(self:game.object):number
 --- @field get_rogue_combo_points fun(self:game.object):number
+--- @field is_interactable fun(self:game.object):boolean
+--- @field get_interact_spell_id fun(self:game.object):boolean
 --- @field debug_print fun(self:game.object):nil

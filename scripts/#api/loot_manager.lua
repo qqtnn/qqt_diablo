@@ -136,3 +136,6 @@ function loot_manager.interact_with_vendor_and_repair_all(obj) end
 --- Repair all items. Requires vendor to be open.
 --- @return boolean
 function loot_manager.repair_all_items() end
+
+--- @return nil
+function loot_manager.drop_item() end
