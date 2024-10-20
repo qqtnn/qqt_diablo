@@ -137,5 +137,14 @@ function loot_manager.interact_with_vendor_and_repair_all(obj) end
 --- @return boolean
 function loot_manager.repair_all_items() end
 
+--- @return boolean
+function loot_manager.use_item() end
+
+--- @return boolean
+function loot_manager.move_item_to_stash() end
+
+--- @return boolean
+function loot_manager.move_item_from_stash() end
+
 --- @return nil
 function loot_manager.drop_item() end
