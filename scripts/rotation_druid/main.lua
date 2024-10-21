@@ -37,6 +37,7 @@ local spells =
     shred               = require("spells/shred"),
     rabies              = require("spells/rabies"),
     lacerate            = require("spells/lacerate"),
+    stone_burst            = require("spells/stone_burst"),
 }
 
 on_render_menu (function ()
@@ -77,6 +78,7 @@ on_render_menu (function ()
     spells.shred.menu();
     spells.rabies.menu();
     spells.lacerate.menu();
+    spells.stone_burst.menu();
     menu.main_tree:pop();
 
 end
@@ -107,7 +109,12 @@ on_update(function ()
     if not local_player then
         return;
     end
-    
+
+    local current_orb_mode = orbwalker.get_orb_mode()
+    if current_orb_mode == orb_mode.none and not my_utility.is_auto_play_enabled() then
+        cast_spell.pause_all_channel_spells(0.25)
+    end
+
     if menu.main_boolean:get() == false then
         -- if plugin is disabled dont do any logic
         return;
@@ -194,6 +201,11 @@ on_update(function ()
             return;
         end
     end
+
+    if spells.stone_burst.logics(best_target)then
+        cast_end_time = current_time + 0.4;
+        return;
+    end;
 
     if spells.claw.logics(best_target)then
         cast_end_time = current_time + 0.4;
