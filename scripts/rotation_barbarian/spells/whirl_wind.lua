@@ -74,12 +74,21 @@ local function logics(target)
     for i, enemy in ipairs(enemies) do
         local enemy_distance = player_position:dist_to(enemy:get_position())
         if enemy_distance < x then
-            if cast_spell.target(target, spell_data_whirl_wind, false) then
-                local current_time = get_time_since_inject();
-                next_time_allowed_cast = current_time;
-                console.print("Casted whirl_wind");
-                return true
-            end
+
+            -- old code (not channeling)
+            -- if cast_spell.target(target, spell_data_whirl_wind, false) then
+            --     local current_time = get_time_since_inject();
+            --     next_time_allowed_cast = current_time;
+            --     console.print("Casted whirl_wind");
+            --     return true
+            -- end
+
+            -- adding multiple channel spells just overrides the current one 
+            cast_spell.add_channel_spell(spell_id_whirl_wind, 0, 1, nil, get_cursor_position(), 0.50, 0.0)
+            local current_time = get_time_since_inject();
+            next_time_allowed_cast = current_time;
+            console.print("Channeling whirl_wind");
+
         end
     end
     return false

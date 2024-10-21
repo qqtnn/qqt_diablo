@@ -129,17 +129,27 @@ on_update(function ()
     if not local_player then
         return;
     end
-    
+
+    local current_orb_mode = orbwalker.get_orb_mode()
+    if current_orb_mode == orb_mode.none and not my_utility.is_auto_play_enabled() then
+        cast_spell.pause_all_channel_spells(0.25)
+    end
+
     if menu.main_boolean:get() == false then
         -- if plugin is disabled dont do any logic
         return;
     end;
 
+    local spell_id_whirl_wind = 206435;
+    if cast_spell.is_channel_spell_active(spell_id_whirl_wind) then
+        cast_spell.update_channel_spell_position(spell_id_whirl_wind, get_cursor_position())
+    end
 
     local current_time = get_time_since_inject()
     if current_time < cast_end_time then
         return;
     end;
+
     local selected_position = my_target_selector.get_current_selected_position()
 
     if not my_utility.is_action_allowed() then
