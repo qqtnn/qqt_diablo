@@ -39,6 +39,7 @@ cast_spell.position = function(spell_id, position, animation_time) end
 --- @param cast_target ?game.object Optional target object.
 --- @param cast_position ?vec3 Optional position to cast the spell at.
 --- @param animation_time ?number Optional animation time.
+--- @param interval ?number Optional interval between casts.
 cast_spell.add_channel_spell = function(spell_id, start_time, finish_time, cast_target, cast_position, animation_time, interval) end
 
 --- Pauses all channel spells.

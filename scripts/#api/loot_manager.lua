@@ -138,13 +138,29 @@ function loot_manager.interact_with_vendor_and_repair_all(obj) end
 function loot_manager.repair_all_items() end
 
 --- @return boolean
-function loot_manager.use_item() end
+--- @param item game.item_data
+function loot_manager.use_item(item) end
 
 --- @return boolean
-function loot_manager.move_item_to_stash() end
+--- @param item game.item_data
+function loot_manager.move_item_to_stash(item) end
 
 --- @return boolean
-function loot_manager.move_item_from_stash() end
+--- @param item game.item_data
+function loot_manager.move_item_from_stash(item) end
 
 --- @return nil
-function loot_manager.drop_item() end
+--- @param item game.item_data
+function loot_manager.drop_item(item) end
+
+--- @return nil
+--- @param item game.item_data
+function loot_manager.buy_item(item) end
+--- @return game.object
+function loot_manager.get_current_vendor() end
+--- @return boolean
+function loot_manager.is_in_vendor_screen() end
+--- @return number -- 0 gold, 3 obols
+function loot_manager.get_vendor_currency_type() end
+--- @return table<game.item_data>
+function loot_manager.get_vendor_items() end

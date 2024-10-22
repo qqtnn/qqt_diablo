@@ -19,6 +19,7 @@
 --- @field public get_secondary_id fun(self:game.item_data):number Retrieve the secondary ID of the item
 --- @field public get_inventory_row fun(self:game.item_data):number Retrieve the inventory row where the item is located
 --- @field public get_inventory_column fun(self:game.item_data):number Retrieve the inventory column where the item is located
+--- @field public get_price fun(self:game.item_data):number
 --- @field public is_valid fun(self:game.item_data):boolean Check if the item data is valid
 --- @constructor fun(self:game.item_data, sno_id:uint32_t, context:void*):game.item_data
 
