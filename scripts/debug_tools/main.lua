@@ -21,8 +21,6 @@ local menu_elements = {
     future_position_time_slider = slider_float:new(0.1, 2.0, 0.5, get_hash("debug_module_unique_id_gameobjects_debug_future_position_time_slider")),
     future_position_radius_slider = slider_float:new(0.2, 2.0, 0.5, get_hash("debug_module_unique_id_gameobjects_debug_future_position_radius_slider")),
 
-    show_distance = checkbox:new(false, get_hash("debug_module_unique_id_gameobjects_debug_show_distance_checkbox")),
-
     -- Local Player Debug
     local_player_debug_tree = tree_node:new(1),
     draw_map_info_checkbox = checkbox:new(false, get_hash("debug_module_unique_id_localplayer_debug_draw_map_info_checkbox")),
@@ -43,6 +41,9 @@ local menu_elements = {
     debug_cursor_pos_keybind = keybind:new(0x0A, false, get_hash("debug_module_unique_id_debug_cursor_pos_keybind")),
 
     enable_buffs_render = checkbox:new(false, get_hash("debug_module_enable_buffs_render_checkbox")),
+    enable_npc_detection = checkbox:new(false, get_hash("debug_module_enable_npc_detection_checkbox")),
+    enable_player_position = checkbox:new(false, get_hash("debug_module_enable_player_position_checkbox")), -- New checkbox for player position
+    enable_actor_logging = checkbox:new(false, get_hash("debug_module_enable_actor_logging_checkbox")),
 }
 
 -- Add item filter menu elements
@@ -52,6 +53,9 @@ local rarities = {"Normal", "Magic", "Magic2", "Rare", "Rare2", "Legendary", "Un
 for _, rarity in ipairs(rarities) do
     menu_elements.rarity_checkboxes[rarity] = checkbox:new(true, get_hash("rarity_checkbox_" .. rarity))
 end
+
+-- Table to store detected NPCs
+local detected_npcs = {}
 
 -- Function to render the item filter menu
 local function render_item_filter_menu()
@@ -97,8 +101,6 @@ local function render_menu()
                     menu_elements.future_position_time_slider:render("Time", "Set the time ahead for future position", 2)
                     menu_elements.future_position_radius_slider:render("Radius", "Set the radius for the future position circle", 2)
                 end
-
-                menu_elements.show_distance:render("Show Distance", "Toggle drawing distance to objects")
 
                 if menu_elements.gameobjects_settings_tree:push("Name Filter") then
                     menu_elements.name_filter_input:render("Filter Text", "Enter text to filter objects by name", true, "Go to Input", "Name Text Filter")
@@ -148,6 +150,9 @@ local function render_menu()
         end
 
         menu_elements.enable_buffs_render:render("Enable Buffs Render", "")
+        menu_elements.enable_npc_detection:render("Enable NPC Detection", "Toggle to detect and render NPCs on screen")
+        menu_elements.enable_player_position:render("Enable Player Position", "Toggle to print player's position") -- New menu item
+        menu_elements.enable_actor_logging:render("Enable Actor Logging", "Toggle to log all actors (enemies, spells, objects)")
 
         menu_elements.main_tree:pop()
     end
@@ -230,22 +235,6 @@ local function draw_object_future_position(obj, player_position, max_distance)
         if distance_to_object_sqr <= (max_distance * max_distance) then
             graphics.circle_3d(future_position, future_radius, color_white(255))
         end
-    end
-end
-
-local function draw_object_distance(obj, player_position, max_distance)
-    local show_distance = menu_elements.show_distance:get()
-    if not show_distance then
-        return
-    end
-
-    local object_position = obj:get_position()
-    local distance_to_object = player_position:dist_to(object_position)
-    local distance_text = string.format("%.2f", distance_to_object)
-    local object_position_2d = graphics.w2s(object_position)
-
-    if object_position_2d then
-        graphics.text_2d(distance_text, object_position_2d, 12, color_white(255))
     end
 end
 
@@ -380,15 +369,9 @@ local function draw_object_information(obj, position_2d, player_position, max_di
         position_2d.y = position_2d.y + 15
     end
 
-    -- Drawing Distance
-    if menu_elements.show_distance:get() then
-        draw_object_distance(obj, player_position, max_distance)
-        position_2d.y = position_2d.y + 15
-    end
-
      -- Drawing Interactable State
      if menu_elements.draw_interactable_checkbox:get() then
-        local is_interactable = not obj:can_not_interact();
+        local is_interactable = obj:is_interactable();
 
         if is_interactable then
             graphics.text_2d("Interactable", position_2d, 12, color_green(255))
@@ -422,10 +405,23 @@ local function render_buff()
         return;
     end
 
+    local top_left_position = vec2.new(0, 30)
+
+    graphics.text_2d("Player Spell ID / Buffs Tracker", top_left_position, 13, color_blue(255))
+
+    for i, buff in ipairs(buffs) do
+        local buff_name = buff:name()
+        local buff_stacks = 0
+        local buff_id = tostring(buff.name_hash)
+        local buff_text = buff_id .. " : " .. buff_name .. " | " .. buff_stacks
+        local buff_position = top_left_position
+        buff_position.y = buff_position.y + 15
+        graphics.text_2d(buff_text, buff_position, 13, color_white(255))
+    end
+
     -- enemy portion
     local enemies_list = actors_manager.get_enemy_npcs();
-    local obj_top_left_position = vec2.new(0, 33)
-    
+    local obj_top_left_position = vec2.new(400, 30)
     graphics.text_2d("Enemies Spell ID / Buffs Tracker", obj_top_left_position, 13, color_red(255))
 
     local cursor_position = get_cursor_position()
@@ -442,31 +438,35 @@ local function render_buff()
             local obj_buff_name = obj_buff:name()
             local obj_buff_id = tostring(obj_buff.name_hash)
             local obj_buff_text = obj_buff_id .. " : " .. obj_buff_name
-            obj_top_left_position.y = obj_top_left_position.y + 15
-            graphics.text_2d(obj_buff_text, obj_top_left_position, 13, color_white(255))
+            local obj_buff_position = obj_top_left_position
+            obj_buff_position.y = obj_buff_position.y + 15
+            graphics.text_2d(obj_buff_text, obj_buff_position, 13, color_white(255))
         end
         
         break;
     end
 
-    local top_left_position = obj_top_left_position
-    top_left_position.y = top_left_position.y + 20
-    graphics.text_2d("Player Spell ID / Buffs Tracker", top_left_position, 13, color_blue(255))
+end
 
-    for i, buff in ipairs(buffs) do
-        local buff_name = buff:name()
-        local buff_end_time = buff:get_end_time()
-        local buff_remaining = buff:get_remaining_time()
-        local buff_stacks = buff.stacks
-        local buff_end_tick = buff.stacks
-        local buff_id = tostring(buff.name_hash)
-        local buff_text = buff_id .. " : " .. buff_name .. " | stacks: " .. buff_stacks .. " | end_tick: " .. string.format("%.1f", buff_end_tick) .. " | end_time: " .. string.format("%.1f", buff_end_time) .. " | remaining: " .. string.format("%.1f", buff_remaining) 
-        top_left_position.y = top_left_position.y + 15
-        graphics.text_2d(buff_text, top_left_position, 13, color_white(255))
+local function render_npcs()
+    -- Check if the NPC detection checkbox is enabled
+    if not menu_elements.enable_npc_detection:get() then
+        return
     end
-
     
-
+    -- Get all NPCs from the actors manager
+    local npcs = actors_manager.get_enemy_npcs()
+    
+    -- Loop through the NPCs and print their names if not already detected
+    for _, npc in ipairs(npcs) do
+        local npc_name = npc:get_skin_name() -- Using get_skin_name() as it's more likely to exist
+        
+        if npc_name and not detected_npcs[npc_name] then
+            -- If NPC is detected for the first time, print it and mark it as detected
+            console.print("NPC Detected: " .. npc_name)
+            detected_npcs[npc_name] = true -- Mark NPC as detected
+        end
+    end
 end
 
 local function render_visuals()
@@ -474,6 +474,7 @@ local function render_visuals()
     if not local_player then return end
 
     render_buff()
+    render_npcs() -- Add this line to call the new NPC rendering function
     local show_gameobjects = menu_elements.object_type_dropdown:get()
     local affiliation = menu_elements.affiliation_dropdown:get()
     local max_distance = menu_elements.distance_slider:get()
@@ -494,11 +495,7 @@ local function render_visuals()
             local object_position = obj:get_position()
             local distance_to_object_sqr = object_position:squared_dist_to_ignore_z(player_position)
 
-            if distance_to_object_sqr 
-            <= (max_distance * max_distance) 
-            --and not obj:can_not_interact() 
-            and (name_filter_text == "" 
-            or string.find(object_name, name_filter_text)) then
+            if distance_to_object_sqr <= (max_distance * max_distance) and obj:is_interactable() and (name_filter_text == "" or string.find(object_name, name_filter_text)) then
                 local object_position_2d = graphics.w2s(object_position)
                 if not object_position_2d then goto continue end
                 local info_position = vec2:new(object_position_2d.x, object_position_2d.y)
@@ -525,6 +522,30 @@ local function render_visuals()
     render_player_circles()
     draw_map_info()
     draw_spells_id()
+end
+
+-- Store the last known player position
+local last_position = nil
+
+local function get_all_actors_data()
+    local enemies = actors_manager.get_enemy_actors()
+    local spells = actors_manager.get_all_particles()
+    local objects = actors_manager.get_all_items()
+
+    console.print("---- Enemy Actors ----")
+    for _, actor in ipairs(enemies) do
+        console.print("Enemy Name: " .. actor:get_skin_name() .. " | ID: " .. actor:get_type_id())
+    end
+
+    console.print("---- Spell Actors ----")
+    for _, spell in ipairs(spells) do
+        console.print("Spell Name: " .. spell:get_skin_name() .. " | ID: " .. spell:get_type_id())
+    end
+
+    console.print("---- Object Actors ----")
+    for _, object in ipairs(objects) do
+        console.print("Object Name: " .. object:get_skin_name() .. " | ID: " .. object:get_type_id())
+    end
 end
 
 local function on_updates()
@@ -566,6 +587,33 @@ local function on_updates()
         -- console.print("get_health_potion_tier: " .. tostring(get_local_player():get_health_potion_tier()))
 
     end
+
+    render_npcs() -- Add this line to call the new NPC rendering function
+
+    -- New code to print player position only when it changes
+    if menu_elements.enable_player_position:get() then
+        local current_position = get_player_position()
+        
+        -- Check if this is the first run or if the position has changed
+        if last_position == nil or 
+           current_position:x() ~= last_position:x() or 
+           current_position:y() ~= last_position:y() or 
+           current_position:z() ~= last_position:z() then
+            
+            -- Print the current position since it has changed
+            console.print("Player Position - X: " .. current_position:x() .. 
+                          " Y: " .. current_position:y() .. 
+                          " Z: " .. current_position:z())
+
+            -- Update the last known position
+            last_position = current_position
+        end
+    end
+
+    -- Only call get_all_actors_data if the checkbox is enabled
+    if menu_elements.enable_actor_logging:get() then
+        get_all_actors_data()
+    end
 end
 
 -- callbacks
@@ -573,4 +621,5 @@ on_render_menu(render_menu)
 on_render(render_visuals)
 on_update(on_updates)
 
-console.print("Lua Plugin - Debug Tools - Version 1.3");
+console.print("Lua Plugin - Debug Tools - Version 1.4"); -- Updated version number
+
