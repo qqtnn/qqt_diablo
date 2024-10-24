@@ -1071,7 +1071,7 @@ on_render(function ()
                                 loot_manager.interact_with_object(actor)
                                 graphics.circle_3d(actor:get_position(), 0.2, color_green(255), 2)
 
-                                if dist < 3.0 or actor:can_not_interact() then
+                                if dist < 3.0 or not actor:is_interactable() then
                                     graphics.text_3d("Lilith Altar (Explored)", actor_position, 20.0, color_green(255))
                                     --draw will only appear on frame idc for now
                                     goal.interacted = true
