@@ -26,3 +26,7 @@ function orbwalker.set_block_movement(value) end
 --- @return nil
 --- @param value boolean
 function orbwalker.set_auto_loot_toggle(value) end
+
+--- @return nil
+--- @param value boolean
+function orbwalker.set_clear_toggle(value) end
