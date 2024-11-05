@@ -133,6 +133,7 @@ function game.object:get_buffs() end
 --- @field get_equipped_items fun(self:game.object):table
 --- @field get_inventory_items fun(self:game.object):table
 --- @field get_consumable_items fun(self:game.object):table
+--- @field get_stash_items fun(self:game.object):table
 --- @field get_dungeon_key_items fun(self:game.object):table
 --- @field get_socketable_items fun(self:game.object):table
 --- @field get_item_slot_index fun(self:game.object, item:game.item_data, bag_id:number):number
