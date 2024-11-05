@@ -13,7 +13,6 @@ local menu = require("menu");
 
 local spells =
 {
-    dance_of_knives        = require("spells/dance_of_knives"),
     concealment             = require("spells/concealment"),
     caltrop                 = require("spells/caltrop"),
     puncture                = require("spells/puncture"),
@@ -37,6 +36,7 @@ local spells =
     shadow_clone            = require("spells/shadow_clone"),
     death_trap              = require("spells/death_trap"),
     rain_of_arrows          = require("spells/rain_of_arrows"),
+    dance_of_knives          = require("spells/dance_of_knives"),
 }
 
 on_render_menu (function ()
@@ -57,7 +57,6 @@ on_render_menu (function ()
 
     menu.dash_cooldown:render("Dash Cooldown", "");
 
-    spells.dance_of_knives.menu();
     spells.concealment.menu();
     spells.caltrop.menu();
     spells.puncture.menu();
@@ -81,6 +80,7 @@ on_render_menu (function ()
     spells.shadow_clone.menu();
     spells.death_trap.menu();
     spells.rain_of_arrows.menu();
+    spells.dance_of_knives.menu();
     menu.main_tree:pop();
     
 end
@@ -329,6 +329,11 @@ on_update(function ()
     end;
 
     if spells.shadow_imbuement.logics()then
+        -- cast_end_time = current_time + 0.4;
+        return;
+    end;
+
+    if spells.dance_of_knives.logics()then
         -- cast_end_time = current_time + 0.4;
         return;
     end;
