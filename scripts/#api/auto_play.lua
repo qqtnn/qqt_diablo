@@ -1,4 +1,4 @@
----@diagnostic disable: missing-return
+---@diagnostic disable: missing-return, duplicate-set-field
 
 --- @class objective
 objective = {

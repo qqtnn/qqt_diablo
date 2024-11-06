@@ -146,4 +146,5 @@ function game.object:get_buffs() end
 --- @field get_rogue_combo_points fun(self:game.object):number
 --- @field is_interactable fun(self:game.object):boolean
 --- @field get_interact_spell_id fun(self:game.object):boolean
+--- @field get_attribute fun(self:game.object, attribute:string):boolean
 --- @field debug_print fun(self:game.object):nil
