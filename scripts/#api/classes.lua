@@ -22,6 +22,7 @@
 --- @field public get_price fun(self:game.item_data):number
 --- @field public get_stack_count fun(self:game.item_data):number
 --- @field public is_valid fun(self:game.item_data):boolean Check if the item data is valid
+--- @field public get_attribute fun(self:game.object, attribute:string):number
 --- @constructor fun(self:game.item_data, sno_id:uint32_t, context:void*):game.item_data
 
 --- @class game.world
@@ -146,5 +147,5 @@ function game.object:get_buffs() end
 --- @field get_rogue_combo_points fun(self:game.object):number
 --- @field is_interactable fun(self:game.object):boolean
 --- @field get_interact_spell_id fun(self:game.object):boolean
---- @field get_attribute fun(self:game.object, attribute:string):boolean
+--- @field get_attribute fun(self:game.object, attribute:string):number
 --- @field debug_print fun(self:game.object):nil

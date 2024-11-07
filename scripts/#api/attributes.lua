@@ -1,4 +1,5 @@
 
+---@type table
 ---@class attributes
 attributes = {
     AXE_BAD_DATA = "Axe_Bad_Data",
