@@ -155,3 +155,10 @@ function is_in_helltide() end
 
 --- @return string
 function get_local_player_name() end
+
+--- @return table<glyph_data>
+function get_glyphs() end
+
+--- @return nil
+--- @param glyph glyph_data
+function upgrade_glyph(glyph) end

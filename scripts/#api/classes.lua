@@ -2,6 +2,16 @@
 
 --- @class ImVec4
 
+--- @class glyph_data
+--- @field public glyph_instance number
+--- @field public glyph_id number
+--- @field public glyph_name_hash number
+--- @field public get_name fun(self: glyph_data): string Retrieve the name of the glyph
+--- @field public get_max_level fun(self: glyph_data): number Retrieve the maximum level of the glyph
+--- @field public get_level fun(self: glyph_data): number Retrieve the current level of the glyph
+--- @field public can_upgrade fun(self: glyph_data): boolean Check if the glyph can be upgraded
+--- @field public get_upgrade_chance fun(self: glyph_data): number Retrieve the chance to upgrade the glyph
+
 --- @class game.item_data
 --- @field public get_skin_name fun(self:game.item_data):string Retrieve the skin name of the item
 --- @field public get_name fun(self:game.item_data):string Retrieve the name of the item
