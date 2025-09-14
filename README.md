@@ -2,7 +2,7 @@
 
 **Join Discord:**
 
-https://discord.gg/hGSVnHmjAX
+https://discord.gg/VE2gztW23q
 
 *Note: If discord ever gets permaban, I will upload here a new Invite Link.*
 
