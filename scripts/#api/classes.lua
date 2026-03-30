@@ -81,6 +81,7 @@
 --- @field public get_current_zone_name fun(self:game.world):string
 --- @field public get_world_id fun(self:game.world):number
 --- @field public is_movable_position fun(self:game.world, pos:vec3):boolean Check if a position is movable/walkable
+--- IMPORTANT NOTE: DISTANCE LIMIT 100-120 RANGE FOR CELLS TO RENDER
 --- @field public calculate_path fun(self:game.world, begin_pos:vec3, end_pos:vec3):vec3[] Calculate a navigation path between two positions
 --- @field public set_height_of_valid_position fun(self:game.world, pos:vec3):vec3 Set the height (Y) of a position to the valid ground height
 
