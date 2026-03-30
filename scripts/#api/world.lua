@@ -10,6 +10,7 @@ function world.get_current_world() end
 --- @return boolean @true if the position is walkable, false otherwise
 function world:is_movable_position(pos) end
 
+--- IMPORTANT NOTE: DISTANCE LIMIT 100-120 RANGE FOR CELLS TO RENDER
 --- Calculate a walkable path between two world positions using A* pathfinding on the game's nav mesh.
 --- Automatically resolves heights and avoids walls, structures, and impassable terrain.
 --- Maximum range is 150 world units. Grid resolution is 0.5 units per cell.
