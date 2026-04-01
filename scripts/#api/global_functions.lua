@@ -162,3 +162,7 @@ function get_glyphs() end
 --- @return nil
 --- @param glyph glyph_data
 function upgrade_glyph(glyph) end
+
+--- @return nil
+--- @param number boss_id
+function teleport_to_boss_dungeon(boss_id) end
