@@ -12,6 +12,47 @@
 --- @field public can_upgrade fun(self: glyph_data): boolean Check if the glyph can be upgraded
 --- @field public get_upgrade_chance fun(self: glyph_data): number Retrieve the chance to upgrade the glyph
 
+--- @class game.item_data_affix
+--- @field public affix_name_hash number The hash of the affix name
+--- @field public balance_offset number The balance offset of the affix
+--- @field public item_acd number The ACD of the item this affix belongs to
+--- @field public item_sno number The SNO of the item this affix belongs to
+--- @field public affix_seed number The seed of the affix
+--- @field public get_roll fun(self:game.item_data_affix):number Get the current roll value of the affix
+--- @field public get_roll_min fun(self:game.item_data_affix):number Get the minimum possible roll value
+--- @field public get_roll_max fun(self:game.item_data_affix):number Get the maximum possible roll value
+--- @field public get_name fun(self:game.item_data_affix):string Get the name of the affix
+--- @field public get_rarity_type fun(self:game.item_data_affix):number Get the rarity type of the affix
+--- @field public get_affix_seed fun(self:game.item_data_affix):number Get the affix seed
+
+--- @class raycast_table
+--- @field public is_hit boolean Whether the raycast hit something
+--- @field public hit_point vec3 The point where the raycast hit
+
+--- @class game.quest
+--- @field public get_id fun(self:game.quest):number Get the quest ID
+--- @field public get_name fun(self:game.quest):string Get the quest name
+--- @field public get_quest_type fun(self:game.quest):number Get the quest type
+--- @field public get_phase_id fun(self:game.quest):number Get the current phase ID
+--- @field public get_secondary_phase_id fun(self:game.quest):number Get the secondary phase ID
+--- @field public has_phase_data fun(self:game.quest):boolean Check if the quest has phase data
+--- @field public get_objectives fun(self:game.quest):game.quest_objective[] Get the quest objectives
+
+--- @class game.quest_objective
+--- @field public text string The objective text
+--- @field public state number The objective state
+--- @field public objective_sno number The objective SNO
+
+--- @enum item_rarity
+--- @field normal number
+--- @field magic number
+--- @field magic_2 number
+--- @field rare number
+--- @field rare_2 number
+--- @field legendary number
+--- @field unique number
+--- @field set number
+
 --- @class game.item_data
 --- @field public get_skin_name fun(self:game.item_data):string Retrieve the skin name of the item
 --- @field public get_name fun(self:game.item_data):string Retrieve the name of the item
@@ -21,7 +62,7 @@
 --- @field public get_rarity fun(self:game.item_data):number Retrieve the rarity of the item
 --- @field public is_junk fun(self:game.item_data):boolean Check if the item is considered junk
 --- @field public is_locked fun(self:game.item_data):boolean Check if the item is locked
---- @field public get_affixes fun(self:game.item_data):table Retrieve affixes of the item
+--- @field public get_affixes fun(self:game.item_data):game.item_data_affix[] Retrieve affixes of the item
 --- @field public get_durability fun(self:game.item_data):number Retrieve the durability of the item
 --- @field public get_acd fun(self:game.item_data):number Retrieve the ACD of the item
 --- @field public get_sno_id fun(self:game.item_data):number Retrieve the SNO ID of the item
@@ -39,6 +80,10 @@
 --- @field public get_name fun(self:game.world):string
 --- @field public get_current_zone_name fun(self:game.world):string
 --- @field public get_world_id fun(self:game.world):number
+--- @field public is_movable_position fun(self:game.world, pos:vec3):boolean Check if a position is movable/walkable
+--- IMPORTANT NOTE: DISTANCE LIMIT 100-120 RANGE FOR CELLS TO RENDER
+--- @field public calculate_path fun(self:game.world, begin_pos:vec3, end_pos:vec3):vec3[] Calculate a navigation path between two positions
+--- @field public set_height_of_valid_position fun(self:game.world, pos:vec3):vec3 Set the height (Y) of a position to the valid ground height
 
 ---@class game.buff
 game.buff = {}
@@ -125,6 +170,7 @@ function game.object:get_buffs() end
 --- @field get_health_potion_tier fun(self:game.object):number
 --- @field get_primary_resource_current fun(self:game.object):number
 --- @field get_primary_resource_max fun(self:game.object):number
+--- @field get_primary_resource_ratio fun(self:game.object):number Get the ratio of current to max primary resource (0.0 to 1.0)
 --- @field is_dead fun(self:game.object):boolean
 --- @field is_enemy fun(self:game.object):boolean
 --- @field is_enemy_with fun(self:game.object, other:game.object):boolean
@@ -157,5 +203,6 @@ function game.object:get_buffs() end
 --- @field get_rogue_combo_points fun(self:game.object):number
 --- @field is_interactable fun(self:game.object):boolean
 --- @field get_interact_spell_id fun(self:game.object):boolean
+--- @field get_radius fun(self:game.object):number Get the collision radius of the object
 --- @field get_attribute fun(self:game.object, attribute:string):number
 --- @field debug_print fun(self:game.object):nil

@@ -138,3 +138,211 @@ utility.summon_boss_next_recipe = function() end
 utility.summon_boss_previous_recipe = function() end
 
 utility.confirm_sigil_notification = function() end
+
+-- ----------------------------------------------------------------
+-- Keyboard
+-- ----------------------------------------------------------------
+
+--- Sends a single key press (key down + key up).
+--- @param vk_code number Virtual-Key code.
+--- @return nil
+utility.send_key_press = function(vk_code) end
+
+--- Sends a key down event.
+--- Useful for held keys such as movement or modifiers.
+--- @param vk_code number Virtual-Key code.
+--- @return nil
+utility.send_key_down = function(vk_code) end
+
+--- Sends a key up event.
+--- @param vk_code number Virtual-Key code.
+--- @return nil
+utility.send_key_up = function(vk_code) end
+
+--- Sends a key combination.
+--- Keys are held in order, the last key is pressed, then released in reverse order.
+--- Example: Ctrl+A, Ctrl+Shift+S
+--- @param ... number Virtual-Key codes.
+--- @return nil
+utility.send_key_combo = function(...) end
+
+--- Sends a full string as character input.
+--- @param text string
+--- @return nil
+utility.send_string = function(text) end
+
+--- Sends a single WM_CHAR character.
+--- @param char_code number Character code, usually from string.byte().
+--- @return nil
+utility.send_char = function(char_code) end
+
+-- Common VK examples:
+-- Enter   = 0x0D
+-- Escape  = 0x1B
+-- Tab     = 0x09
+-- Space   = 0x20
+-- Shift   = 0x10
+-- Ctrl    = 0x11
+-- Alt     = 0x12
+-- Left    = 0x25
+-- Up      = 0x26
+-- Right   = 0x27
+-- Down    = 0x28
+-- F1-F12  = 0x70 - 0x7B
+-- A-Z     = 0x41 - 0x5A
+-- 0-9     = 0x30 - 0x39
+
+-- Examples:
+-- utility.send_key_press(0x0D) -- Enter
+-- utility.send_key_press(0x1B) -- Escape
+-- utility.send_key_press(string.byte('I')) -- Inventory
+-- utility.send_key_down(0x11) -- Hold Ctrl
+-- utility.send_key_up(0x11) -- Release Ctrl
+-- utility.send_key_combo(0x11, string.byte('A')) -- Ctrl+A
+-- utility.send_key_combo(0x11, 0x10, string.byte('S')) -- Ctrl+Shift+S
+-- utility.send_string("hello world")
+-- utility.send_char(string.byte('x'))
+
+-- ----------------------------------------------------------------
+-- Mouse
+-- ----------------------------------------------------------------
+
+--- Sends a left mouse click at client coordinates.
+--- @param x number
+--- @param y number
+--- @return nil
+utility.send_mouse_click = function(x, y) end
+
+--- Sends a right mouse click at client coordinates.
+--- @param x number
+--- @param y number
+--- @return nil
+utility.send_mouse_right_click = function(x, y) end
+
+--- Sends a middle mouse click at client coordinates.
+--- @param x number
+--- @param y number
+--- @return nil
+utility.send_mouse_middle_click = function(x, y) end
+
+--- Sends a left mouse double click at client coordinates.
+--- @param x number
+--- @param y number
+--- @return nil
+utility.send_mouse_double_click = function(x, y) end
+
+--- Sends a mouse button down event.
+--- button: 0 = left, 1 = right, 2 = middle
+--- @param x number
+--- @param y number
+--- @param button number
+--- @return nil
+utility.send_mouse_down = function(x, y, button) end
+
+--- Sends a mouse button up event.
+--- button: 0 = left, 1 = right, 2 = middle
+--- @param x number
+--- @param y number
+--- @param button number
+--- @return nil
+utility.send_mouse_up = function(x, y, button) end
+
+--- Moves the mouse to client coordinates without clicking.
+--- @param x number
+--- @param y number
+--- @return nil
+utility.send_mouse_move = function(x, y) end
+
+--- Sends a vertical mouse wheel event.
+--- delta: +120 = up, -120 = down
+--- @param x number
+--- @param y number
+--- @param delta number
+--- @return nil
+utility.send_mouse_wheel = function(x, y, delta) end
+
+--- Sends a horizontal mouse wheel event.
+--- @param x number
+--- @param y number
+--- @param delta number
+--- @return nil
+utility.send_mouse_hwheel = function(x, y, delta) end
+
+--- Drags the mouse from one point to another.
+--- button: 0 = left, 1 = right, 2 = middle
+--- If omitted, button is usually left.
+--- @param x1 number
+--- @param y1 number
+--- @param x2 number
+--- @param y2 number
+--- @param button? number
+--- @return nil
+utility.send_mouse_drag = function(x1, y1, x2, y2, button) end
+
+-- ----------------------------------------------------------------
+-- Small practical examples
+-- Tip: prefer screen-relative coordinates instead of hardcoded pixels.
+-- This keeps clicks more consistent across different resolutions.
+-- ----------------------------------------------------------------
+
+-- local function accept_dialog()
+--     utility.send_key_press(0x0D) -- Enter
+-- end
+
+-- local function close_menu()
+--     utility.send_key_press(0x1B) -- Escape
+-- end
+
+-- local function toggle_map()
+--     utility.send_key_press(string.byte('M'))
+-- end
+
+-- Example: click near the center of the screen, then confirm with Enter.
+-- local function join_realm()
+--     local w = get_screen_width()
+--     local h = get_screen_height()
+--     local x = w * 0.5
+--     local y = h * 0.5
+--
+--     utility.send_mouse_click(x, y)
+--     utility.send_key_press(0x0D)
+-- end
+
+-- Example: hold W for a short duration.
+-- local hold_start = nil
+-- local hold_duration = 2.0
+--
+-- local function start_move_forward()
+--     utility.send_key_down(string.byte('W'))
+--     hold_start = get_time_since_inject()
+-- end
+--
+-- local function update_move_forward()
+--     if hold_start and get_time_since_inject() - hold_start >= hold_duration then
+--         utility.send_key_up(string.byte('W'))
+--         hold_start = nil
+--     end
+-- end
+
+-- Example: scroll using the center of the screen as a safe generic anchor.
+-- local function scroll_vendor_down(ticks)
+--     ticks = ticks or 3
+--     local w = get_screen_width()
+--     local h = get_screen_height()
+--     local cx = w * 0.5
+--     local cy = h * 0.5
+--
+--     for i = 1, ticks do
+--         utility.send_mouse_wheel(cx, cy, -120)
+--     end
+-- end
+
+-- Example: click a position using relative coordinates.
+-- local function click_bottom_right_area()
+--     local w = get_screen_width()
+--     local h = get_screen_height()
+--     local x = w * 0.85
+--     local y = h * 0.85
+--
+--     utility.send_mouse_click(x, y)
+-- end
