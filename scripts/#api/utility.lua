@@ -133,6 +133,10 @@ utility.toggle_mount = function() end
 -- 101 = 0x1D6CEF
 utility.open_pit_portal = function(level) end
 
+--- Reveals the minimap.
+--- @return boolean
+utility.reveal_minimap = function() end
+
 utility.summon_boss = function() end
 utility.summon_boss_next_recipe = function() end
 utility.summon_boss_previous_recipe = function() end
@@ -278,6 +282,11 @@ utility.send_mouse_hwheel = function(x, y, delta) end
 --- @param button? number
 --- @return nil
 utility.send_mouse_drag = function(x1, y1, x2, y2, button) end
+
+--- Gets the cursor position in game-window client coordinates.
+--- @return number x
+--- @return number y
+utility.get_cursor_screen_position = function() end
 
 -- ----------------------------------------------------------------
 -- Small practical examples

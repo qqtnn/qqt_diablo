@@ -171,6 +171,9 @@ function game.object:get_buffs() end
 --- @field get_primary_resource_current fun(self:game.object):number
 --- @field get_primary_resource_max fun(self:game.object):number
 --- @field get_primary_resource_ratio fun(self:game.object):number Get the ratio of current to max primary resource (0.0 to 1.0)
+--- @field get_secondary_resource_current fun(self:game.object):number
+--- @field get_secondary_resource_max fun(self:game.object):number
+--- @field get_secondary_resource_ratio fun(self:game.object):number Get the ratio of current to max secondary resource (0.0 to 1.0)
 --- @field is_dead fun(self:game.object):boolean
 --- @field is_enemy fun(self:game.object):boolean
 --- @field is_enemy_with fun(self:game.object, other:game.object):boolean
@@ -191,6 +194,7 @@ function game.object:get_buffs() end
 --- @field get_inventory_items fun(self:game.object):table
 --- @field get_consumable_items fun(self:game.object):table
 --- @field get_stash_items fun(self:game.object):table
+--- @field get_talisman_items fun(self:game.object):table
 --- @field get_dungeon_key_items fun(self:game.object):table
 --- @field get_socketable_items fun(self:game.object):table
 --- @field get_item_slot_index fun(self:game.object, item:game.item_data, bag_id:number):number
