@@ -36,12 +36,23 @@
 --- @field public get_phase_id fun(self:game.quest):number Get the current phase ID
 --- @field public get_secondary_phase_id fun(self:game.quest):number Get the secondary phase ID
 --- @field public has_phase_data fun(self:game.quest):boolean Check if the quest has phase data
+--- @field public get_elapsed fun(self:game.quest):number Get elapsed quest time.
+--- @field public get_phase_kill_progress fun(self:game.quest):game.objective_progress Get active phase kill progress.
+--- @field public get_phase_timer_progress fun(self:game.quest):game.objective_progress Get active phase timer progress.
 --- @field public get_objectives fun(self:game.quest):game.quest_objective[] Get the quest objectives
 
 --- @class game.quest_objective
 --- @field public text string The objective text
 --- @field public state number The objective state
 --- @field public objective_sno number The objective SNO
+--- @field public has_progress boolean Whether objective progress is available
+--- @field public progress_ratio number Objective progress ratio
+
+--- @class game.objective_progress
+--- @field public valid boolean Whether progress data is available
+--- @field public current number Current progress value
+--- @field public max number Maximum progress value
+--- @field public ratio number Progress ratio
 
 --- @enum item_rarity
 --- @field normal number
