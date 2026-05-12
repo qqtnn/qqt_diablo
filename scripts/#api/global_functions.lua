@@ -147,6 +147,18 @@ function get_helltide_coin_cinders() end
 --- @return number
 function get_helltide_coin_hearts() end
 
+--- @return number
+function get_aether_count() end
+
+--- @return number
+function get_hordes_wave_time() end
+
+--- @return number
+function get_hordes_waves_completed() end
+
+--- @return number
+function get_hordes_max_waves() end
+
 --- @return boolean
 function is_chat_open() end
 

@@ -84,6 +84,7 @@
 --- @field public get_price fun(self:game.item_data):number
 --- @field public get_stack_count fun(self:game.item_data):number
 --- @field public is_valid fun(self:game.item_data):boolean Check if the item data is valid
+--- @field public is_filtered_by_loot_filter fun(self:game.item_data):boolean Check if the item is filtered by the loot filter
 --- @field public get_attribute fun(self:game.object, attribute:string):number
 --- @constructor fun(self:game.item_data, sno_id:uint32_t, context:void*):game.item_data
 
