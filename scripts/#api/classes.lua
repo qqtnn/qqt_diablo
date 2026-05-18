@@ -96,6 +96,20 @@
 --- IMPORTANT NOTE: DISTANCE LIMIT 100-120 RANGE FOR CELLS TO RENDER
 --- @field public calculate_path fun(self:game.world, begin_pos:vec3, end_pos:vec3):vec3[] Calculate a navigation path between two positions
 --- @field public set_height_of_valid_position fun(self:game.world, pos:vec3):vec3 Set the height (Y) of a position to the valid ground height
+--- @field public get_scene_for_position fun(self:game.world, pos:vec3):game.scene|nil Get the scene containing a world position
+
+--- @class game.scene
+--- @field public get_name fun(self:game.scene):string
+--- @field public get_scene_id fun(self:game.scene):number
+--- @field public get_object_id fun(self:game.scene):number
+--- @field public get_world_id fun(self:game.scene):number
+--- @field public get_world fun(self:game.scene):game.world|nil
+--- @field public get_level_area_for_position fun(self:game.scene, pos:vec3):game.level_area|nil Get the level area containing a world position
+
+--- @class game.level_area
+--- @field public get_name fun(self:game.level_area):string
+--- @field public get_id fun(self:game.level_area):number
+--- @field public get_flags fun(self:game.level_area):number
 
 ---@class game.buff
 game.buff = {}

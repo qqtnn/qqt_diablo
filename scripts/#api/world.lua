@@ -24,6 +24,11 @@ function world:calculate_path(start, finish) end
 --- @param pos vec3 The position to resolve. Z is modified in-place
 function world:set_height_of_valid_position(pos) end
 
+--- Get the scene containing a world position.
+--- @param pos vec3 The world position to query
+--- @return game.scene|nil @Scene containing the position, or nil if not found
+function world:get_scene_for_position(pos) end
+
 --- Get the current world's unique identifier.
 --- @return number @The world ID
 function world:get_world_id() end
@@ -35,3 +40,48 @@ function world:get_name() end
 --- Get the current zone/subzone name.
 --- @return string @The zone name
 function world:get_current_zone_name() end
+
+game = game or {}
+
+---@class game.scene
+game.scene = {}
+
+--- Get the scene name.
+--- @return string
+function game.scene:get_name() end
+
+--- Get the scene ID.
+--- @return number
+function game.scene:get_scene_id() end
+
+--- Get the scene object ID.
+--- @return number
+function game.scene:get_object_id() end
+
+--- Get the world ID for this scene.
+--- @return number
+function game.scene:get_world_id() end
+
+--- Get the world containing this scene.
+--- @return game.world|nil
+function game.scene:get_world() end
+
+--- Get the level area containing a world position.
+--- @param pos vec3 The world position to query
+--- @return game.level_area|nil @Level area containing the position, or nil if not found
+function game.scene:get_level_area_for_position(pos) end
+
+---@class game.level_area
+game.level_area = {}
+
+--- Get the level area name.
+--- @return string
+function game.level_area:get_name() end
+
+--- Get the level area ID.
+--- @return number
+function game.level_area:get_id() end
+
+--- Get the level area flags.
+--- @return number
+function game.level_area:get_flags() end
